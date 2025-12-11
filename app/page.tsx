@@ -11,17 +11,11 @@ import {
   useState,
 } from "react";
 
-const MIN_DISCOUNT = 5;
-const MAX_DISCOUNT = 30;
-
 type FormFields = {
   name: string;
   phone: string;
   carModel: string;
 };
-
-const getRandomDiscount = () =>
-  Math.floor(Math.random() * (MAX_DISCOUNT - MIN_DISCOUNT + 1)) + MIN_DISCOUNT;
 
 type GlassButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
@@ -29,6 +23,9 @@ type GlassButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   surfaceClassName?: string;
   surfaceProps?: Partial<GlassSurfaceProps>;
 };
+
+const MIN_DISCOUNT = 21;
+const MAX_DISCOUNT = 31;
 
 const GlassButton = ({
   children,
@@ -80,14 +77,16 @@ export default function Home() {
     phone: "",
     carModel: "",
   });
-  const [displayedDiscount, setDisplayedDiscount] = useState<number | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [isGeneratingModalOpen, setIsGeneratingModalOpen] = useState(false);
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [revealedDiscount, setRevealedDiscount] = useState<number | null>(null);
+  const [generatedDiscounts, setGeneratedDiscounts] = useState<Record<string, number>>({});
+  const [formError, setFormError] = useState<string | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
@@ -122,31 +121,51 @@ export default function Home() {
   const handleInputChange = (field: keyof FormFields) =>
     (event: ChangeEvent<HTMLInputElement>) => {
       setFormData((prev) => ({ ...prev, [field]: event.target.value }));
+      if (formError) setFormError(null);
     };
 
   const handleGenerate = () => {
     if (!isFormValid || isGenerating) return;
 
-    setIsGenerating(true);
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
+    const normalizedName = formData.name.trim().toLowerCase();
+    const normalizedPhone = formData.phone.replace(/\D/g, "");
+    const submissionKey = `${normalizedName}|${normalizedPhone}`;
+
+    const hasDuplicate = Object.keys(generatedDiscounts).some((key) => {
+      const [existingName, existingPhone] = key.split("|");
+      return existingName === normalizedName || existingPhone === normalizedPhone;
+    });
+
+    if (hasDuplicate) {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      setIsGenerating(false);
+      setIsGeneratingModalOpen(false);
+      setIsResultModalOpen(false);
+      setFormError("A discount already exists for this name or phone number.");
+      return;
     }
+
+    setIsGenerating(true);
+    setIsGeneratingModalOpen(true);
+    setIsResultModalOpen(false);
+    setRevealedDiscount(null);
+
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
 
-    intervalRef.current = setInterval(() => {
-      setDisplayedDiscount(getRandomDiscount());
-    }, 80);
-
     timeoutRef.current = setTimeout(() => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      const finalDiscount = getRandomDiscount();
-      setDisplayedDiscount(finalDiscount);
+      const discount =
+        Math.floor(Math.random() * (MAX_DISCOUNT - MIN_DISCOUNT + 1)) + MIN_DISCOUNT;
+      setGeneratedDiscounts((prev) => ({ ...prev, [submissionKey]: discount }));
+      setRevealedDiscount(discount);
+      setFormError(null);
       setIsGenerating(false);
-    }, 1500);
+      setIsGeneratingModalOpen(false);
+      setIsResultModalOpen(true);
+    }, 1600);
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -304,9 +323,9 @@ export default function Home() {
           <div className="flex max-h-[calc(100vh-2rem)] flex-col gap-6 overflow-y-auto rounded-[34px] border border-white/15 bg-black px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-sm sm:px-6 md:max-h-full md:px-10 md:py-8">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-3xl font-semibold">Claim your launch bonus</h2>
+                <h2 className="text-3xl font-semibold">Claim your Bonus</h2>
                 <p className="mt-2 text-sm text-white/70">
-                  Submit your details to reveal a personalized Crystal Auto Detailing offer.
+                  Submit your details to reveal a special offer.
                 </p>
               </div>
               <button
@@ -332,9 +351,6 @@ export default function Home() {
               <span className="rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold text-white md:text-sm">
                 UP TO 70% OFF!
               </span>
-              <span className="text-xs uppercase tracking-[0.4em] text-white/60">
-                limited launch allocations
-              </span>
             </div>
 
             <form className="space-y-4 md:space-y-5" onSubmit={handleSubmit}>
@@ -344,10 +360,10 @@ export default function Home() {
                 </label>
                 <input
                   type="text"
-                  placeholder="Skyler Rey"
+                  placeholder="Enter your name"
                   value={formData.name}
                   onChange={handleInputChange("name")}
-                  className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-white/60 md:py-3 md:text-base"
+                  className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-white outline-none transition focus:border-white/60 md:py-2.5 md:text-base"
                 />
               </div>
               <div className="space-y-1">
@@ -356,10 +372,10 @@ export default function Home() {
                 </label>
                 <input
                   type="tel"
-                  placeholder="(+880)1798656969"
+                  placeholder="Enter your phone number"
                   value={formData.phone}
                   onChange={handleInputChange("phone")}
-                  className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-white/60 md:py-3 md:text-base"
+                  className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-white outline-none transition focus:border-white/60 md:py-2.5 md:text-base"
                 />
               </div>
               <div className="space-y-1">
@@ -368,42 +384,109 @@ export default function Home() {
                 </label>
                 <input
                   type="text"
-                  placeholder="2024 Porsche Taycan"
+                  placeholder="Enter your car model"
                   value={formData.carModel}
                   onChange={handleInputChange("carModel")}
-                  className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-white/60 md:py-3 md:text-base"
+                  className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-white outline-none transition focus:border-white/60 md:py-2.5 md:text-base"
                 />
               </div>
 
-              <GlassButton
+              <button
                 type="submit"
                 disabled={!isFormValid || isGenerating}
-                className="mt-2 w-full px-6 py-3.5 text-sm tracking-[0.25em] text-white md:mt-4 md:text-base"
-                surfaceProps={{ tint: "rgba(12, 15, 24, 0.9)" }}
+                className="mt-2 mx-auto flex w-fit items-center justify-center gap-2 rounded-full border border-white/25 bg-black/80 px-6 py-3 text-base font-semibold tracking-[0.26em] text-white transition hover:border-white/40 hover:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:cursor-not-allowed disabled:opacity-40 md:mt-4"
               >
                 <span>{isGenerating ? "Generating" : "Generate Discount"}</span>
                 {isGenerating && <div className="h-2 w-2 rounded-full bg-white" />}
-              </GlassButton>
-            </form>
+              </button>
 
-            <div className="rounded-2xl border border-white/15 bg-white/5 p-5 md:p-6">
-              <p className="text-sm uppercase tracking-[0.4em] text-white/60">Your discount</p>
-              <div className="mt-4 flex items-end gap-3">
-                <p className={`text-5xl font-semibold leading-none ${isGenerating ? "animate-pulse" : ""}`}>
-                  {displayedDiscount ? `${displayedDiscount}%` : "--"}
+              {formError && (
+                <p className="text-sm font-medium text-red-400" role="alert">
+                  {formError}
                 </p>
-                <span className="text-xs text-white/60">
-                  {isGenerating
-                    ? "Calibrating offer"
-                    : displayedDiscount
-                    ? "Locked in"
-                    : "Awaiting details"}
-                </span>
-              </div>
-              <p className="mt-4 text-xs text-white/60">
-                Tap generate to lock in a launch incentive tailored to your vehicle.
+              )}
+
+              <p className="text-[11px] text-white/50 md:text-xs">
+                This discount is generation is randomly generated by  our system.
               </p>
+            </form>
+          </div>
+        </GlassSurface>
+      </div>
+
+      <div
+        className={`fixed inset-0 z-40 flex items-center justify-center px-6 transition duration-300 ${
+          isGeneratingModalOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        aria-hidden={!isGeneratingModalOpen}
+      >
+        <div className="absolute inset-0 bg-black/60" />
+        <GlassSurface
+          width="100%"
+          height="auto"
+          borderRadius={24}
+          backgroundOpacity={0.35}
+          brightness={70}
+          opacity={0.95}
+          saturation={1.2}
+          blur={20}
+          borderWidth={0.08}
+          tint="rgba(6, 9, 18, 0.92)"
+          className="smooth-panel relative w-full max-w-sm"
+          style={{ padding: 0 }}
+        >
+          <div className="relative flex flex-col items-center gap-4 rounded-3xl border border-white/15 bg-black/85 px-6 py-7 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-white/80 animate-bounce" style={{ animationDelay: "0s" }} />
+              <span className="h-2.5 w-2.5 rounded-full bg-white/80 animate-bounce" style={{ animationDelay: "0.12s" }} />
+              <span className="h-2.5 w-2.5 rounded-full bg-white/80 animate-bounce" style={{ animationDelay: "0.24s" }} />
             </div>
+            <div className="space-y-1">
+              <p className="text-lg font-semibold">Generating your discount</p>
+              <p className="text-sm text-white/70">Hang tight while we tailor an offer for your vehicle.</p>
+            </div>
+          </div>
+        </GlassSurface>
+      </div>
+
+      <div
+        className={`fixed inset-0 z-40 flex items-center justify-center px-6 transition duration-300 ${
+          isResultModalOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        aria-hidden={!isResultModalOpen}
+      >
+        <div className="absolute inset-0 bg-black/60" />
+        <GlassSurface
+          width="100%"
+          height="auto"
+          borderRadius={24}
+          backgroundOpacity={0.35}
+          brightness={70}
+          opacity={0.95}
+          saturation={1.2}
+          blur={20}
+          borderWidth={0.08}
+          tint="rgba(6, 9, 18, 0.92)"
+          className="smooth-panel relative w-full max-w-sm"
+          style={{ padding: 0 }}
+        >
+          <div className="relative flex flex-col items-center gap-4 rounded-3xl border border-white/15 bg-black/85 px-6 py-7 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+            <p className="text-lg font-semibold">
+              {formData.name ? `Congratulations, ${formData.name}!` : "Congratulations!"}
+            </p>
+            <p className="text-sm uppercase tracking-[0.4em] text-white/60">Your discount</p>
+            <p className="text-5xl font-semibold leading-none">
+              {revealedDiscount !== null ? `${revealedDiscount}%` : "--"}
+            </p>
+            <p className="text-sm text-white/70">Locked in for your vehicle. Show this at check-in.</p>
+            <GlassButton
+              type="button"
+              className="mt-2 px-5 py-2.5 text-xs font-semibold tracking-[0.04em] text-white normal-case"
+              surfaceProps={{ tint: "rgba(6, 9, 18, 0.85)" }}
+              onClick={() => setIsResultModalOpen(false)}
+            >
+              Close
+            </GlassButton>
           </div>
         </GlassSurface>
       </div>
