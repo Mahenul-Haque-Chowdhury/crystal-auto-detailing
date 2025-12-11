@@ -94,19 +94,28 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof document === "undefined") return;
-    const previousOverflow = document.body.style.overflow;
-    const shouldLockScroll = isDiscountOpen || isStoryOpen;
+    const html = document.documentElement;
 
-    if (shouldLockScroll) {
+    const lockScroll = () => {
       document.body.style.overflow = "hidden";
+      html.style.overflow = "hidden";
+    };
+
+    const unlockScroll = () => {
+      document.body.style.overflow = "";
+      html.style.overflow = "";
+    };
+
+    if (isDiscountOpen) {
+      lockScroll();
     } else {
-      document.body.style.overflow = previousOverflow || "";
+      unlockScroll();
     }
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      unlockScroll();
     };
-  }, [isDiscountOpen, isStoryOpen]);
+  }, [isDiscountOpen]);
 
   const isFormValid = Object.values(formData).every((field) => field.trim().length);
 
