@@ -265,11 +265,10 @@ export default function Home() {
       </div>
 
       <div
-        className={`fixed inset-0 z-30 flex items-end justify-center overflow-y-auto px-3 pb-6 pt-8 transition sm:px-4 md:items-center md:px-6 md:py-0 ${
+        className={`fixed inset-0 z-30 flex items-start justify-center overflow-y-auto px-3 py-4 transition sm:px-4 md:items-center md:px-6 md:py-0 ${
           isDiscountOpen ? "pointer-events-auto" : "pointer-events-none"
         }`}
         aria-hidden={!isDiscountOpen}
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
       >
         <div
           className={`absolute inset-0 bg-black/80 transition-opacity duration-300 ${
@@ -288,7 +287,7 @@ export default function Home() {
           blur={28}
           borderWidth={0.08}
           tint="rgba(0, 0, 0, 0.95)"
-          className={`glass-dialog-shell smooth-panel relative w-full max-w-lg max-h-[90vh] overflow-hidden overscroll-contain transform-gpu md:max-w-3xl ${
+          className={`glass-dialog-shell smooth-panel relative w-full max-w-lg overflow-y-auto overscroll-contain transform-gpu md:max-w-3xl md:overflow-visible ${
             isDiscountOpen
               ? "modal-enter"
               : hasDiscountInteracted
@@ -302,11 +301,11 @@ export default function Home() {
             backgroundColor: "rgba(0, 0, 0, 0.95)",
           }}
         >
-          <div className="flex max-h-[80vh] flex-col gap-5 overflow-y-auto rounded-[34px] border border-white/15 bg-black px-4 pb-6 pt-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-sm sm:px-6 md:max-h-full md:px-10 md:pb-10 md:pt-8">
-            <div className="sticky top-0 z-10 -mx-4 flex items-start justify-between gap-4 border-b border-white/10 bg-black/90 px-4 pb-4 backdrop-blur-sm sm:-mx-6 sm:px-6">
+          <div className="flex max-h-[calc(100vh-2rem)] flex-col gap-6 overflow-y-auto rounded-[34px] border border-white/15 bg-black px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-sm sm:px-6 md:max-h-full md:px-10 md:py-8">
+            <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-3xl font-semibold">Claim your launch bonus</h2>
-                <p className="mt-1.5 text-sm text-white/70 md:mt-2">
+                <p className="mt-2 text-sm text-white/70">
                   Submit your details to reveal a personalized Crystal Auto Detailing offer.
                 </p>
               </div>
@@ -330,7 +329,7 @@ export default function Home() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <span className="rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white md:px-4 md:text-sm">
+              <span className="rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold text-white md:text-sm">
                 UP TO 70% OFF!
               </span>
               <span className="text-xs uppercase tracking-[0.4em] text-white/60">
@@ -338,7 +337,7 @@ export default function Home() {
               </span>
             </div>
 
-            <form className="space-y-3.5 md:space-y-5" onSubmit={handleSubmit}>
+            <form className="space-y-4 md:space-y-5" onSubmit={handleSubmit}>
               <div className="space-y-1">
                 <label className="text-xs uppercase tracking-[0.3em] text-white/60">
                   Full name
