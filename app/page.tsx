@@ -92,6 +92,22 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const previousOverflow = document.body.style.overflow;
+    const shouldLockScroll = isDiscountOpen || isStoryOpen;
+
+    if (shouldLockScroll) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = previousOverflow || "";
+    }
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isDiscountOpen, isStoryOpen]);
+
   const isFormValid = Object.values(formData).every((field) => field.trim().length);
 
   const handleInputChange = (field: keyof FormFields) =>
