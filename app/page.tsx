@@ -1,6 +1,7 @@
 "use client";
 
 import GlassSurface, { type GlassSurfaceProps } from "@/components/GlassSurface";
+import Image from "next/image";
 import {
   ButtonHTMLAttributes,
   ChangeEvent,
@@ -206,12 +207,18 @@ export default function Home() {
       </video>
       <div className="backdrop-fade fixed inset-0" />
 
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center gap-6 px-6 pb-12 pt-24 text-center md:px-12">
-        <div className="pointer-events-none absolute inset-x-0 top-8 flex flex-col items-center text-center text-xs font-semibold uppercase tracking-[0.55em] text-white drop-shadow-[0_8px_26px_rgba(0,0,0,0.65)]">
-          <span className="block text-base md:text-lg">Crystal Auto</span>
-          <span className="mt-1 block text-base md:text-lg">Detailing</span>
+      <div className="relative z-10 flex h-screen flex-col items-center justify-center gap-6 px-6 pt-20 pb-10 text-center md:px-12 md:pt-24 md:pb-12">
+        <div className="pointer-events-none absolute inset-x-0 -top-12 flex flex-col items-center text-center text-xs font-semibold uppercase tracking-[0.55em] text-white drop-shadow-[0_8px_26px_rgba(0,0,0,0.65)]">
+          <Image
+            src="/ghora1.png"
+            alt="Crystal Auto Detailing logo"
+            width={400}
+            height={400}
+            className="h-[17rem] w-[17rem] object-contain"
+            priority
+          />
         </div>
-        <div className="space-y-3 text-3xl font-semibold leading-tight md:text-6xl">
+        <div className="-mt-14 space-y-3 text-3xl font-semibold leading-tight md:-mt-10 md:text-6xl">
           <p>Revive</p>
           <p>Refresh</p>
           <p>Reimagine Your Ride</p>
@@ -222,17 +229,17 @@ export default function Home() {
             type="button"
             className="px-3 py-1.5 text-xs font-semibold tracking-[0.02em] text-white normal-case"
             surfaceClassName="inline-flex mx-auto max-w-fit"
-            surfaceProps={{ tint: "rgba(255, 255, 255, 0.09)" }}
+            surfaceProps={{ tint: "rgba(255, 255, 255, 0.16)", backgroundOpacity: 0.18, blur: 18 }}
             onClick={() => setIsStoryOpen(true)}
           >
-            Our story
+            Founder’s Message
           </GlassButton>
         </div>
         <div className="hidden gap-4 md:flex">
           <GlassButton
             type="button"
             className="border border-white/30 px-8 py-3 text-sm tracking-[0.4em]"
-            surfaceProps={{ tint: "rgba(8, 8, 8, 0.54)" }}
+            surfaceProps={{ tint: "rgba(255, 255, 255, 0.16)", backgroundOpacity: 0.18, blur: 18 }}
             onClick={handleExplore}
           >
             Explore Discount
@@ -241,12 +248,12 @@ export default function Home() {
       </div>
 
       {!isDiscountOpen && !isStoryOpen && (
-        <div className="fixed inset-x-0 bottom-8 z-20 flex justify-center px-6 md:hidden">
+        <div className="fixed inset-x-0 bottom-16 z-20 flex justify-center px-6 md:hidden">
           <GlassButton
             type="button"
             className="glow-ring w-full max-w-sm px-6 py-3 text-base tracking-[0.35em] text-white"
             surfaceClassName="w-full max-w-sm"
-            surfaceProps={{ tint: "rgba(31, 29, 29, 0.45)" }}
+            surfaceProps={{ tint: "rgba(255, 255, 255, 0.16)", backgroundOpacity: 0.18, blur: 18 }}
             onClick={handleExplore}
           >
             Explore Discount
@@ -273,10 +280,10 @@ export default function Home() {
         <GlassButton
           type="button"
           className="px-5 py-2.5 text-xs font-semibold tracking-[0.04em] normal-case"
-          surfaceProps={{ tint: "rgba(6, 9, 18, 0.85)" }}
+          surfaceProps={{ tint: "rgba(255, 255, 255, 0.12)", backgroundOpacity: 0.16, blur: 18 }}
           onClick={() => setIsStoryOpen(true)}
         >
-          Our story
+          Founder’s Message
         </GlassButton>
       </div>
 
@@ -501,7 +508,6 @@ export default function Home() {
         }`}
       >
         <div className="flex items-center justify-between">
-          <p className="text-xs uppercase tracking-[0.5em] text-white/60">Studio Story</p>
           <GlassButton
             type="button"
             className="px-4 py-2 text-[0.55rem] tracking-[0.45em]"
@@ -511,29 +517,33 @@ export default function Home() {
             Close
           </GlassButton>
         </div>
-        <h3 className="text-3xl font-semibold leading-tight">Our story</h3>
+        <h3 className="text-3xl font-semibold leading-tight">Founder’s Message</h3>
         <div className="space-y-4 text-sm leading-relaxed text-white/75">
           <p>
-            Crystal Auto Detailing was founded with one goal in mind: to bring out the true beauty
-            of every vehicle that comes through our doors. What began as a personal love for clean,
-            well-kept cars has grown into a full-service detailing shop trusted by drivers who want
-            quality without compromise.
+            Crystal Auto Detailing began with a dream and a lot of courage. 
+            This is a small startup built from a deep passion for cars and a desire to create something of real value. 
+            I started this journey with one belief. If you put your heart into your work, people will feel it.
           </p>
           <p>
-            From the start, we focused on doing things the right way—using premium products, modern
-            techniques, and giving every vehicle the time and attention it deserves. Over the years,
-            our dedication to craftsmanship and customer satisfaction has shaped who we are today.
+            Every car we handle is more than a job for us. It is a chance to prove ourselves. 
+            It is a chance to show that a new business can still deliver honest work, careful hands, and real dedication. 
+            As a young startup we may be growing, but our commitment is already strong. We take every customer, every car, 
+            and every detail seriously.
           </p>
           <p>
-            At Crystal Auto Detailing, we believe detailing is more than a service—it is an
-            experience. We work hard to make sure every customer leaves with a car that feels
-            refreshed, protected, and ready to turn heads. Your vehicle is an investment, and we are
-            here to help it shine for years to come.
+            Thank you for supporting a new beginning. Your trust means everything to us.
+            It gives us strength, hope, and the motivation to build something lasting and meaningful.
           </p>
+          <div className="space-y-1 text-white/80">
+            <p>-</p>
+            <p>Riffat Tonmoy</p>
+            <p>Founder</p>
+            <p>Crystal Auto Detailing</p>
+          </div>
         </div>
       </aside>
 
-      {/* <div className="pointer-events-auto fixed bottom-3 left-4 z-30 text-[10px] text-white/60 md:text-[11px]">
+      <div className="pointer-events-auto fixed bottom-3 left-1/2 z-30 text-[10px] text-white/60 md:text-[11px] -translate-x-1/2">
         Developed by
         <a
           href="https://grayvally.tech"
@@ -543,7 +553,7 @@ export default function Home() {
         >
           GrayVally IT
         </a>
-      </div> */}
+      </div>
     </main>
   );
 }
