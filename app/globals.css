@@ -1,26 +1,177 @@
 @import "tailwindcss";
+@import "../components/GlassSurface.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #05060b;
+  --foreground: #f5f7fb;
+  --muted: rgba(255, 255, 255, 0.65);
+  --accent: #5eead4;
+  --accent-strong: #3dd7c0;
+  --glass: rgba(5, 6, 11, 0.55);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-crystal-grotesk);
 }
 
 body {
-  background: var(--background);
+  min-height: 100vh;
+  margin: 0;
+  background: #05060b;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-crystal-grotesk), "Space Grotesk", system-ui;
+  letter-spacing: 0.01em;
+}
+
+.backdrop-fade::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 25% 25%, rgba(5, 6, 11, 0.18), rgba(5, 6, 11, 0.36)),
+    linear-gradient(180deg, rgba(5, 6, 11, 0.15) 0%, rgba(5, 6, 11, 0.48) 55%, rgba(5, 6, 11, 0.7) 100%);
+  pointer-events: none;
+}
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 rgba(94, 234, 212, 0.35);
+  }
+  70% {
+    box-shadow: 0 0 40px rgba(94, 234, 212, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(94, 234, 212, 0);
+  }
+}
+
+.glow-ring {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.glass-dialog-shell {
+  position: relative;
+  border-radius: 2.25rem;
+  box-shadow:
+    0 45px 120px rgba(0, 0, 0, 0.55),
+    0 0 80px rgba(86, 238, 255, 0.12);
+}
+
+.glass-dialog-shell::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.04)),
+    radial-gradient(circle at 20% 20%, rgba(93, 243, 255, 0.25), transparent 55%);
+  mix-blend-mode: screen;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.glass-dialog-shell::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(83, 255, 203, 0.3), rgba(81, 172, 255, 0.25), rgba(255, 255, 255, 0));
+  filter: blur(18px);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.smooth-panel {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.media-guard {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+.close-orb {
+  display: inline-flex;
+  align-items: center;
+  justify-items: center;
+  justify-content: center;
+  height: 44px;
+  width: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 200, 255, 0.35);
+  background: radial-gradient(circle at 30% 30%, rgba(120, 200, 255, 0.25), rgba(0, 0, 0, 0.8));
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.5),
+    0 0 18px rgba(90, 160, 255, 0.35);
+  transition: box-shadow 200ms ease, transform 200ms ease;
+  padding: 0;
+}
+
+.close-orb:hover,
+.close-orb:focus-visible {
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.55),
+    0 0 24px rgba(120, 200, 255, 0.55);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.close-orb__icon {
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px rgba(120, 200, 255, 0.65));
+}
+
+@keyframes modalSlideIn {
+  0% {
+    transform: translate3d(0, 100%, 0) scale(0.98);
+    opacity: 0;
+  }
+  70% {
+    transform: translate3d(0, -6px, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideOut {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 100%, 0) scale(0.95);
+    opacity: 0;
+  }
+}
+
+.modal-enter {
+  animation: modalSlideIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.modal-exit {
+  animation: modalSlideOut 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-enter,
+  .modal-exit {
+    animation: none !important;
+  }
+
+  .smooth-panel {
+    transition: none !important;
+    transform: none !important;
+  }
 }
