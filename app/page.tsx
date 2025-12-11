@@ -2,6 +2,7 @@
 
 import GlassSurface, { type GlassSurfaceProps } from "@/components/GlassSurface";
 import Image from "next/image";
+import localFont from "next/font/local";
 import {
   ButtonHTMLAttributes,
   ChangeEvent,
@@ -11,6 +12,17 @@ import {
   useRef,
   useState,
 } from "react";
+
+const migra = localFont({
+  src: [
+    {
+      path: "../Migra - Free for Personal Use/Migra-Extralight.woff2",
+      weight: "510",
+      style: "normal",
+    },
+  ],
+  display: "swap",
+});
 
 type FormFields = {
   name: string;
@@ -218,7 +230,9 @@ export default function Home() {
             priority
           />
         </div>
-        <div className="-mt-14 space-y-3 text-3xl font-semibold leading-tight md:-mt-10 md:text-6xl">
+        <div
+          className={`${migra.className} -mt-14 space-y-3 text-3xl font-[510] leading-tight md:-mt-10 md:text-6xl`}
+        >
           <p>Revive</p>
           <p>Refresh</p>
           <p>Reimagine Your Ride</p>
@@ -280,7 +294,7 @@ export default function Home() {
         <GlassButton
           type="button"
           className="px-5 py-2.5 text-xs font-semibold tracking-[0.04em] normal-case"
-          surfaceProps={{ tint: "rgba(255, 255, 255, 0.12)", backgroundOpacity: 0.16, blur: 18 }}
+          surfaceProps={{ tint: "rgba(255, 255, 255, 0.12)", backgroundOpacity: 0.16, blur: 18 }} 
           onClick={() => setIsStoryOpen(true)}
         >
           Founder’s Message
@@ -482,7 +496,16 @@ export default function Home() {
             <p className="text-5xl font-semibold leading-none">
               {revealedDiscount !== null ? `${revealedDiscount}%` : "--"}
             </p>
-            <p className="text-sm text-white/70">Locked in for your vehicle. Show this at check-in.</p>
+            <p className="text-sm text-white/70">Locked in for your vehicle. Book it instantly on WhatsApp.</p>
+            <a
+              href="https://wa.me/message/IIVZBS4QEYXCD1"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-black shadow-lg transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >
+              <span className="inline-block h-2.5 w-2.5 rounded-full bg-black/25" aria-hidden />
+              Book on WhatsApp
+            </a>
             <GlassButton
               type="button"
               className="mt-2 px-5 py-2.5 text-xs font-semibold tracking-[0.04em] text-white normal-case"
