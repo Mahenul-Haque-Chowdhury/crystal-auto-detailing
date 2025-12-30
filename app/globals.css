@@ -31,6 +31,22 @@ html {
   overflow: hidden;
 }
 
+button:not(:disabled),
+input[type="button"]:not(:disabled),
+input[type="submit"]:not(:disabled),
+input[type="reset"]:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+button:disabled,
+input[type="button"]:disabled,
+input[type="submit"]:disabled,
+input[type="reset"]:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 .backdrop-fade::after {
   content: "";
   position: absolute;
@@ -100,6 +116,7 @@ html {
   user-select: none;
   -webkit-user-drag: none;
   -webkit-touch-callout: none;
+  filter: brightness(0.82);
 }
 
 /* Hide WebKit scrollbars to prevent stray bar when content fits viewport */

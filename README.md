@@ -1,6 +1,6 @@
-## Crystal Auto Detailing Landing Page
+## Crystal Valley Auto Detail Landing Page
 
-A single-page Next.js experience with a cinematic video backdrop and the Crystal Auto Detailing discount generator.
+A single-page Next.js experience with a cinematic video backdrop and the Crystal Valley Auto Detail discount generator.
 
 ### Prerequisites
 

@@ -1,6 +1,7 @@
 "use client";
 
 import GlassSurface, { type GlassSurfaceProps } from "@/components/GlassSurface";
+import AdaptiveBackgroundVideo from "@/components/AdaptiveBackgroundVideo";
 import Image from "next/image";
 import localFont from "next/font/local";
 import {
@@ -24,6 +25,8 @@ const migra = localFont({
   display: "swap",
 });
 
+const LOGO_SRC = "/ghora1.png?v=2025-12-30";
+
 type FormFields = {
   name: string;
   phone: string;
@@ -39,6 +42,49 @@ type GlassButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const MIN_DISCOUNT = 21;
 const MAX_DISCOUNT = 31;
+
+const DISCOUNT_STORAGE_KEY = "cvad:discounts:v1";
+const LAST_SUBMISSION_KEY_STORAGE_KEY = "cvad:lastSubmissionKey:v1";
+
+type DiscountStore = Record<string, number>;
+
+const safeParseDiscountStore = (value: string | null): DiscountStore => {
+  if (!value) return {};
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (!parsed || typeof parsed !== "object") return {};
+
+    const result: DiscountStore = {};
+    for (const [key, rawValue] of Object.entries(parsed as Record<string, unknown>)) {
+      if (typeof rawValue === "number" && Number.isFinite(rawValue)) {
+        result[key] = rawValue;
+      }
+    }
+    return result;
+  } catch {
+    return {};
+  }
+};
+
+const getDiscountStore = (): DiscountStore => {
+  if (typeof window === "undefined") return {};
+  return safeParseDiscountStore(window.localStorage.getItem(DISCOUNT_STORAGE_KEY));
+};
+
+const setDiscountStore = (store: DiscountStore) => {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(DISCOUNT_STORAGE_KEY, JSON.stringify(store));
+};
+
+const getLastSubmissionKey = (): string | null => {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(LAST_SUBMISSION_KEY_STORAGE_KEY);
+};
+
+const setLastSubmissionKey = (key: string) => {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(LAST_SUBMISSION_KEY_STORAGE_KEY, key);
+};
 
 const GlassButton = ({
   children,
@@ -94,15 +140,28 @@ export default function Home() {
   const [isGeneratingModalOpen, setIsGeneratingModalOpen] = useState(false);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
   const [revealedDiscount, setRevealedDiscount] = useState<number | null>(null);
-  const [generatedDiscounts, setGeneratedDiscounts] = useState<Record<string, number>>({});
+  const [generatedDiscounts, setGeneratedDiscounts] = useState<Record<string, number>>(() =>
+    typeof window === "undefined" ? {} : getDiscountStore()
+  );
+  const [activeSubmissionKey, setActiveSubmissionKey] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasHydratedDiscountsRef = useRef(false);
 
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    hasHydratedDiscountsRef.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydratedDiscountsRef.current) return;
+    setDiscountStore(generatedDiscounts);
+  }, [generatedDiscounts]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -137,17 +196,45 @@ export default function Home() {
       if (formError) setFormError(null);
     };
 
+  const buildSubmissionKey = () => {
+    const normalizedName = formData.name.trim().toLowerCase();
+    const normalizedPhone = formData.phone.replace(/\D/g, "");
+    return {
+      normalizedName,
+      normalizedPhone,
+      submissionKey: `${normalizedName}|${normalizedPhone}`,
+    };
+  };
+
+  const openWhatsAppBooking = () => {
+    const messageDiscountKey = activeSubmissionKey ?? getLastSubmissionKey();
+    const store = getDiscountStore();
+    const discount = (messageDiscountKey ? store[messageDiscountKey] : undefined) ?? revealedDiscount ?? undefined;
+
+    if (!discount) return;
+
+    const message =
+      `Hello Crystal Valley Auto Detail,\n` +
+      `I’ve received a ${discount}% discount coupon via your website and would like to book a service.`;
+
+    const url = `https://wa.me/message/IIVZBS4QEYXCD1?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const handleGenerate = () => {
     if (!isFormValid || isGenerating) return;
 
-    const normalizedName = formData.name.trim().toLowerCase();
-    const normalizedPhone = formData.phone.replace(/\D/g, "");
-    const submissionKey = `${normalizedName}|${normalizedPhone}`;
+    const { normalizedName, normalizedPhone, submissionKey } = buildSubmissionKey();
+    const store = getDiscountStore();
+    const mergedKeys = new Set([...Object.keys(store), ...Object.keys(generatedDiscounts)]);
 
-    const hasDuplicate = Object.keys(generatedDiscounts).some((key) => {
+    const hasDuplicate = Array.from(mergedKeys).some((key) => {
       const [existingName, existingPhone] = key.split("|");
+      if (key === submissionKey) return false;
       return existingName === normalizedName || existingPhone === normalizedPhone;
     });
+
+    const cachedDiscount = store[submissionKey] ?? generatedDiscounts[submissionKey];
 
     if (hasDuplicate) {
       if (timeoutRef.current) {
@@ -157,6 +244,17 @@ export default function Home() {
       setIsGeneratingModalOpen(false);
       setIsResultModalOpen(false);
       setFormError("A discount already exists for this name or phone number.");
+      return;
+    }
+
+    if (cachedDiscount) {
+      setActiveSubmissionKey(submissionKey);
+      setLastSubmissionKey(submissionKey);
+      setRevealedDiscount(cachedDiscount);
+      setFormError(null);
+      setIsGenerating(false);
+      setIsGeneratingModalOpen(false);
+      setIsResultModalOpen(true);
       return;
     }
 
@@ -172,6 +270,8 @@ export default function Home() {
     timeoutRef.current = setTimeout(() => {
       const discount =
         Math.floor(Math.random() * (MAX_DISCOUNT - MIN_DISCOUNT + 1)) + MIN_DISCOUNT;
+      setActiveSubmissionKey(submissionKey);
+      setLastSubmissionKey(submissionKey);
       setGeneratedDiscounts((prev) => ({ ...prev, [submissionKey]: discount }));
       setRevealedDiscount(discount);
       setFormError(null);
@@ -199,34 +299,17 @@ export default function Home() {
 
   return (
     <main className="relative min-h-screen overflow-hidden text-white">
-      <video
-        className="media-guard fixed inset-0 h-full w-full object-cover"
-        src="/background.mp4"
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
-        aria-hidden="true"
-        controls={false}
-        controlsList="nodownload nofullscreen noremoteplayback"
-        disablePictureInPicture
-        draggable={false}
-        tabIndex={-1}
-        onContextMenu={(event) => event.preventDefault()}
-      >
-        <source src="/background.mp4" type="video/mp4" />
-      </video>
+      <AdaptiveBackgroundVideo />
       <div className="backdrop-fade fixed inset-0" />
 
       <div className="relative z-10 flex h-screen flex-col items-center justify-center gap-6 px-6 pt-20 pb-10 text-center md:px-12 md:pt-24 md:pb-12">
-        <div className="pointer-events-none absolute inset-x-0 -top-12 flex flex-col items-center text-center text-xs font-semibold uppercase tracking-[0.55em] text-white drop-shadow-[0_8px_26px_rgba(0,0,0,0.65)]">
+        <div className="pointer-events-none absolute inset-x-0 -top-2 flex flex-col items-center text-center text-xs font-semibold uppercase tracking-[0.55em] text-white drop-shadow-[0_8px_26px_rgba(0,0,0,0.65)]">
           <Image
-            src="/ghora1.png"
-            alt="Crystal Auto Detailing logo"
+            src={LOGO_SRC}
+            alt="Crystal Valley Auto Detail logo"
             width={400}
             height={400}
-            className="h-[17rem] w-[17rem] object-contain"
+            className="h-40 w-40 object-contain"
             priority
           />
         </div>
@@ -497,15 +580,14 @@ export default function Home() {
               {revealedDiscount !== null ? `${revealedDiscount}%` : "--"}
             </p>
             <p className="text-sm text-white/70">Locked in for your vehicle. Book it instantly on WhatsApp.</p>
-            <a
-              href="https://wa.me/message/IIVZBS4QEYXCD1"
-              target="_blank"
-              rel="noreferrer noopener"
+            <button
+              type="button"
+              onClick={openWhatsAppBooking}
               className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-black shadow-lg transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
             >
               <span className="inline-block h-2.5 w-2.5 rounded-full bg-black/25" aria-hidden />
               Book on WhatsApp
-            </a>
+            </button>
             <GlassButton
               type="button"
               className="mt-2 px-5 py-2.5 text-xs font-semibold tracking-[0.04em] text-white normal-case"
@@ -530,51 +612,56 @@ export default function Home() {
           isStoryOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between">
-          <GlassButton
+        <div className="flex items-center justify-end">
+          <button
             type="button"
-            className="px-4 py-2 text-[0.55rem] tracking-[0.45em]"
-            surfaceProps={{ tint: "rgba(255, 255, 255, 0.12)" }}
+            aria-label="Close founder message"
+            className="close-orb"
             onClick={() => setIsStoryOpen(false)}
           >
-            Close
-          </GlassButton>
+            <svg
+              aria-hidden="true"
+              width="18"
+              height="18"
+              viewBox="0 0 18 18"
+              className="close-orb__icon"
+            >
+              <path d="M4.5 4.5l9 9" />
+              <path d="M13.5 4.5l-9 9" />
+            </svg>
+          </button>
         </div>
         <h3 className="text-3xl font-semibold leading-tight">Founder’s Message</h3>
         <div className="space-y-4 text-sm leading-relaxed text-white/75">
           <p>
-            Crystal Auto Detailing began with a dream and a lot of courage. 
-            This is a small startup built from a deep passion for cars and a desire to create something of real value. 
-            I started this journey with one belief. If you put your heart into your work, people will feel it.
+            Crystal Valley Auto Detail began with passion and courage. I started this journey with one simple belief:
+            when you put your heart into your work, people feel it.
           </p>
           <p>
-            Every car we handle is more than a job for us. It is a chance to prove ourselves. 
-            It is a chance to show that a new business can still deliver honest work, careful hands, and real dedication. 
-            As a young startup we may be growing, but our commitment is already strong. We take every customer, every car, 
-            and every detail seriously.
+            We may be a young business, but our commitment is strong. Every car is treated with care, honesty, and attention
+            because trust matters.
           </p>
           <p>
-            Thank you for supporting a new beginning. Your trust means everything to us.
-            It gives us strength, hope, and the motivation to build something lasting and meaningful.
+            Thank you for supporting our journey. Your trust motivates us to build something meaningful and lasting.
           </p>
           <div className="space-y-1 text-white/80">
             <p>-</p>
             <p>Riffat Tonmoy</p>
             <p>Founder</p>
-            <p>Crystal Auto Detailing</p>
+            <p>Crystal Valley Auto Detail</p>
           </div>
         </div>
       </aside>
 
-      <div className="pointer-events-auto fixed bottom-3 left-1/2 z-30 text-[10px] text-white/60 md:text-[11px] -translate-x-1/2">
-        Developed by
+      <div className="pointer-events-auto fixed bottom-3 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center text-center text-[10px] text-white/60 md:text-[11px]">
+        <span>Developed by</span>
         <a
           href="https://grayvally.tech"
           target="_blank"
           rel="noreferrer noopener"
-          className="ml-1 font-semibold text-white underline-offset-2 hover:underline"
+          className="font-semibold text-white underline-offset-2 hover:underline"
         >
-          GrayVally IT
+          GrayVally Software Solutions
         </a>
       </div>
     </main>
