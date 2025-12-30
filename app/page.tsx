@@ -217,7 +217,8 @@ export default function Home() {
       `Hello Crystal Valley Auto Detail,\n` +
       `I’ve received a ${discount}% discount coupon via your website and would like to book a service.`;
 
-    const url = `https://wa.me/message/IIVZBS4QEYXCD1?text=${encodeURIComponent(message)}`;
+    // Use wa.me/<phone>?text= because wa.me/message/<code> does not reliably support prefilled text.
+    const url = `https://wa.me/8801841353850?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
