@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type VideoTier = "off" | "on";
+type VideoTier = "off" | "p540" | "p720" | "p1080";
 
 type NetworkInformationLike = {
   saveData?: boolean;
@@ -34,7 +34,7 @@ const storePlayheadSeconds = (seconds: number) => {
 };
 
 function getVideoTier(): VideoTier {
-  if (typeof window === "undefined") return "on";
+  if (typeof window === "undefined") return "p1080";
 
   const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
   if (prefersReducedMotion) return "off";
@@ -44,25 +44,17 @@ function getVideoTier(): VideoTier {
 
   const effectiveType = connection?.effectiveType ?? "";
   if (effectiveType === "slow-2g" || effectiveType === "2g") return "off";
-  // Keep video enabled; quality is fixed (single 1080p asset).
 
-  const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
-  void deviceMemory;
-
-  const cores = navigator.hardwareConcurrency;
-  void cores;
-
+  // Default: Android tends to struggle more with 1080p60.
   const ua = navigator.userAgent ?? "";
-  void ua;
+  const isAndroid = /Android/i.test(ua);
+  if (isAndroid) return "p720";
 
-  const isSmallViewport = window.matchMedia?.("(max-width: 640px)")?.matches;
-  void isSmallViewport;
-
-  return "on";
+  return "p1080";
 }
 
 export default function AdaptiveBackgroundVideo() {
-  const [tier, setTier] = useState<VideoTier>("on");
+  const [tier, setTier] = useState<VideoTier>(() => getVideoTier());
   const [shouldLoad, setShouldLoad] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -112,9 +104,77 @@ export default function AdaptiveBackgroundVideo() {
   }, [shouldLoad, tier]);
 
   const src = useMemo(() => {
-    if (tier === "on") return "/background-1080.mp4";
+    if (tier === "p1080") return "/background-1080.mp4";
+    if (tier === "p720") return "/background-720.mp4";
+    if (tier === "p540") return "/background-540.mp4";
     return null;
   }, [tier]);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined") return;
+    if (tier === "off") return;
+    if (!shouldLoad) return;
+
+    const mc = (navigator as Navigator & {
+      mediaCapabilities?: {
+        decodingInfo?: (config: unknown) => Promise<{ supported: boolean; smooth?: boolean; powerEfficient?: boolean }>;
+      };
+    }).mediaCapabilities;
+
+    // If MediaCapabilities isn't available, keep the UA-based default.
+    if (!mc?.decodingInfo) return;
+
+    let cancelled = false;
+
+    const probe = async (width: number, height: number, bitrate: number) => {
+      try {
+        const result = await mc.decodingInfo({
+          type: "file",
+          video: {
+            contentType: 'video/mp4; codecs="avc1.42E01E"',
+            width,
+            height,
+            bitrate,
+            framerate: 60,
+          },
+        });
+        return result;
+      } catch {
+        return null;
+      }
+    };
+
+    const pickTier = async () => {
+      // Prefer power efficient + supported. Smoothness hint isn't always provided.
+      const r1080 = await probe(1920, 1080, 4_500_000);
+      if (!cancelled && r1080?.supported && r1080.powerEfficient) {
+        setTier("p1080");
+        return;
+      }
+
+      const r720 = await probe(1280, 720, 2_500_000);
+      if (!cancelled && r720?.supported) {
+        setTier("p720");
+        return;
+      }
+
+      const r540 = await probe(960, 540, 1_600_000);
+      if (!cancelled && r540?.supported) {
+        setTier("p540");
+        return;
+      }
+
+      if (!cancelled) {
+        setTier("off");
+      }
+    };
+
+    void pickTier();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [shouldLoad, tier]);
 
   useEffect(() => {
     const video = videoRef.current;

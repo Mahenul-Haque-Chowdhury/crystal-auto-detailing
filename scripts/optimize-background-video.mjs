@@ -9,6 +9,8 @@ const publicDir = path.join(projectRoot, "public");
 
 const input = path.join(publicDir, "background.mp4");
 const out1080 = path.join(publicDir, "background-1080.mp4");
+const out720 = path.join(publicDir, "background-720.mp4");
+const out540 = path.join(publicDir, "background-540.mp4");
 const poster = path.join(publicDir, "background-poster.jpg");
 
 if (!existsSync(input)) {
@@ -57,8 +59,7 @@ run(
   "poster"
 );
 
-// 1080p 60fps (single source of truth)
-// Note: some Android devices may still struggle with 1080p60 regardless of encoding.
+// 1080p60 (best quality; may not be power-efficient on many Android devices)
 run(
   [
     "-y",
@@ -70,7 +71,7 @@ run(
     "-c:v",
     "libx264",
     "-profile:v",
-    "main",
+    "baseline",
     "-level",
     "4.2",
     "-pix_fmt",
@@ -79,14 +80,12 @@ run(
     "veryfast",
     "-tune",
     "fastdecode",
-    // Cap bitrate spikes (helps mobile decoders / thermal throttling).
     "-maxrate",
     "4500k",
     "-bufsize",
     "9000k",
-    // Reduce decode complexity a bit.
     "-x264-params",
-    "ref=1:bframes=0:weightp=0:keyint=120:min-keyint=60",
+    "cabac=0:ref=1:bframes=0:weightp=0:keyint=120:min-keyint=60:scenecut=0",
     "-crf",
     "24",
     "-movflags",
@@ -96,6 +95,80 @@ run(
   "1080p60"
 );
 
+// 720p60 (typically smoother on Android while still looking sharp)
+run(
+  [
+    "-y",
+    "-i",
+    input,
+    "-an",
+    "-vf",
+    "scale=-2:720,fps=60",
+    "-c:v",
+    "libx264",
+    "-profile:v",
+    "baseline",
+    "-level",
+    "4.0",
+    "-pix_fmt",
+    "yuv420p",
+    "-preset",
+    "veryfast",
+    "-tune",
+    "fastdecode",
+    "-maxrate",
+    "2500k",
+    "-bufsize",
+    "5000k",
+    "-x264-params",
+    "cabac=0:ref=1:bframes=0:weightp=0:keyint=120:min-keyint=60:scenecut=0",
+    "-crf",
+    "25",
+    "-movflags",
+    "+faststart",
+    out720,
+  ],
+  "720p60"
+);
+
+// 540p60 (fallback for lower-end Android devices)
+run(
+  [
+    "-y",
+    "-i",
+    input,
+    "-an",
+    "-vf",
+    "scale=-2:540,fps=60",
+    "-c:v",
+    "libx264",
+    "-profile:v",
+    "baseline",
+    "-level",
+    "3.2",
+    "-pix_fmt",
+    "yuv420p",
+    "-preset",
+    "veryfast",
+    "-tune",
+    "fastdecode",
+    "-maxrate",
+    "1600k",
+    "-bufsize",
+    "3200k",
+    "-x264-params",
+    "cabac=0:ref=1:bframes=0:weightp=0:keyint=120:min-keyint=60:scenecut=0",
+    "-crf",
+    "27",
+    "-movflags",
+    "+faststart",
+    out540,
+  ],
+  "540p60"
+);
+
 console.log("\nGenerated:");
 console.log(`- ${path.relative(projectRoot, poster)}`);
 console.log(`- ${path.relative(projectRoot, out1080)}`);
+console.log(`- ${path.relative(projectRoot, out720)}`);
+console.log(`- ${path.relative(projectRoot, out540)}`);
