@@ -9,6 +9,30 @@ type NetworkInformationLike = {
   effectiveType?: string;
 };
 
+const PLAYHEAD_STORAGE_KEY = "cvad:bgVideoPlayheadSeconds:v1";
+
+const readStoredPlayheadSeconds = (): number | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(PLAYHEAD_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = Number.parseFloat(raw);
+    return Number.isFinite(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+const storePlayheadSeconds = (seconds: number) => {
+  if (typeof window === "undefined") return;
+  if (!Number.isFinite(seconds) || seconds <= 0) return;
+  try {
+    window.sessionStorage.setItem(PLAYHEAD_STORAGE_KEY, seconds.toString());
+  } catch {
+    // Ignore storage failures (private mode, quota, etc.)
+  }
+};
+
 function getVideoTier(): VideoTier {
   if (typeof window === "undefined") return "high";
 
@@ -94,6 +118,65 @@ export default function AdaptiveBackgroundVideo() {
     return null;
   }, [tier]);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !shouldLoad || !src) return;
+
+    video.dataset.ready = "false";
+
+    let lastStoredAt = 0;
+
+    const persistPlayhead = () => {
+      const now = Date.now();
+      if (now - lastStoredAt < 900) return;
+      lastStoredAt = now;
+      storePlayheadSeconds(video.currentTime);
+    };
+
+    const restoreAndPlay = () => {
+      const storedSeconds = readStoredPlayheadSeconds();
+      if (
+        typeof storedSeconds === "number" &&
+        Number.isFinite(video.duration) &&
+        storedSeconds > 0 &&
+        storedSeconds < Math.max(0, video.duration - 0.25)
+      ) {
+        try {
+          video.currentTime = storedSeconds;
+        } catch {
+          // Some browsers may block programmatic seeking until enough data is buffered.
+        }
+      }
+
+      // Best-effort start; muted videos generally allow autoplay.
+      void video.play().catch(() => undefined);
+    };
+
+    const markVisible = () => {
+      video.dataset.ready = "true";
+    };
+
+    video.addEventListener("timeupdate", persistPlayhead);
+    video.addEventListener("pause", persistPlayhead);
+    video.addEventListener("loadedmetadata", restoreAndPlay);
+    video.addEventListener("canplay", markVisible, { once: true });
+    video.addEventListener("playing", markVisible, { once: true });
+    window.addEventListener("pagehide", persistPlayhead);
+
+    if (video.readyState >= 1) {
+      restoreAndPlay();
+    }
+
+    return () => {
+      video.removeEventListener("timeupdate", persistPlayhead);
+      video.removeEventListener("pause", persistPlayhead);
+      video.removeEventListener("loadedmetadata", restoreAndPlay);
+      video.removeEventListener("canplay", markVisible);
+      video.removeEventListener("playing", markVisible);
+      window.removeEventListener("pagehide", persistPlayhead);
+    };
+  }, [shouldLoad, src]);
+
   if (tier === "off") {
     return null;
   }
@@ -101,8 +184,8 @@ export default function AdaptiveBackgroundVideo() {
   return (
     <video
       ref={videoRef}
-      className="media-guard fixed inset-0 h-full w-full object-cover"
-      autoPlay
+      data-ready="false"
+      className="media-guard fixed inset-0 h-svh w-screen object-cover opacity-0 transition-opacity duration-1000 ease-out motion-reduce:transition-none data-[ready=true]:opacity-100"
       loop
       muted
       playsInline

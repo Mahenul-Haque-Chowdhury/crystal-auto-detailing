@@ -303,7 +303,7 @@ export default function Home() {
       <AdaptiveBackgroundVideo />
       <div className="backdrop-fade fixed inset-0" />
 
-      <div className="relative z-10 flex h-screen flex-col items-center justify-center gap-6 px-6 pt-20 pb-10 text-center md:px-12 md:pt-24 md:pb-12">
+      <div className="relative z-10 flex min-h-svh flex-col items-center justify-center gap-6 px-6 pt-20 pb-10 text-center md:px-12 md:pt-24 md:pb-12">
         <div className="pointer-events-none absolute inset-x-0 -top-2 flex flex-col items-center text-center text-xs font-semibold uppercase tracking-[0.55em] text-white drop-shadow-[0_8px_26px_rgba(0,0,0,0.65)]">
           <Image
             src={LOGO_SRC}
