@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type VideoTier = "off" | "low" | "high";
+type VideoTier = "off" | "on";
 
 type NetworkInformationLike = {
   saveData?: boolean;
@@ -34,7 +34,7 @@ const storePlayheadSeconds = (seconds: number) => {
 };
 
 function getVideoTier(): VideoTier {
-  if (typeof window === "undefined") return "high";
+  if (typeof window === "undefined") return "on";
 
   const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
   if (prefersReducedMotion) return "off";
@@ -44,26 +44,25 @@ function getVideoTier(): VideoTier {
 
   const effectiveType = connection?.effectiveType ?? "";
   if (effectiveType === "slow-2g" || effectiveType === "2g") return "off";
-  if (effectiveType === "3g") return "low";
+  // Keep video enabled; quality is fixed (single 1080p asset).
 
   const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
-  if (typeof deviceMemory === "number" && deviceMemory <= 2) return "low";
+  void deviceMemory;
 
   const cores = navigator.hardwareConcurrency;
-  if (typeof cores === "number" && cores > 0 && cores <= 4) return "low";
+  void cores;
 
   const ua = navigator.userAgent ?? "";
-  const isAndroid = /Android/i.test(ua);
-  if (isAndroid) return "low";
+  void ua;
 
   const isSmallViewport = window.matchMedia?.("(max-width: 640px)")?.matches;
-  if (isSmallViewport) return "low";
+  void isSmallViewport;
 
-  return "high";
+  return "on";
 }
 
 export default function AdaptiveBackgroundVideo() {
-  const [tier, setTier] = useState<VideoTier>("high");
+  const [tier, setTier] = useState<VideoTier>("on");
   const [shouldLoad, setShouldLoad] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -113,8 +112,7 @@ export default function AdaptiveBackgroundVideo() {
   }, [shouldLoad, tier]);
 
   const src = useMemo(() => {
-    if (tier === "high") return "/background-720.mp4";
-    if (tier === "low") return "/background-480.mp4";
+    if (tier === "on") return "/background-1080.mp4";
     return null;
   }, [tier]);
 

@@ -51,8 +51,8 @@ input[type="reset"]:disabled,
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 25% 25%, rgba(5, 6, 11, 0.18), rgba(5, 6, 11, 0.36)),
-    linear-gradient(180deg, rgba(5, 6, 11, 0.15) 0%, rgba(5, 6, 11, 0.48) 55%, rgba(5, 6, 11, 0.7) 100%);
+  background: radial-gradient(circle at 25% 25%, rgba(5, 6, 11, 0.22), rgba(5, 6, 11, 0.42)),
+    linear-gradient(180deg, rgba(5, 6, 11, 0.2) 0%, rgba(5, 6, 11, 0.55) 55%, rgba(5, 6, 11, 0.78) 100%);
   pointer-events: none;
 }
 
@@ -116,7 +116,6 @@ input[type="reset"]:disabled,
   user-select: none;
   -webkit-user-drag: none;
   -webkit-touch-callout: none;
-  filter: brightness(0.82);
 }
 
 /* Hide WebKit scrollbars to prevent stray bar when content fits viewport */

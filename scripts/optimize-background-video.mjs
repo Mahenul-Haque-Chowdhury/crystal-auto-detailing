@@ -8,8 +8,7 @@ const projectRoot = process.cwd();
 const publicDir = path.join(projectRoot, "public");
 
 const input = path.join(publicDir, "background.mp4");
-const out720 = path.join(publicDir, "background-720.mp4");
-const out480 = path.join(publicDir, "background-480.mp4");
+const out1080 = path.join(publicDir, "background-1080.mp4");
 const poster = path.join(publicDir, "background-poster.jpg");
 
 if (!existsSync(input)) {
@@ -58,7 +57,8 @@ run(
   "poster"
 );
 
-// 720p desktop-ish (smaller than original, faststart)
+// 1080p 60fps (single source of truth)
+// Note: some Android devices may still struggle with 1080p60 regardless of encoding.
 run(
   [
     "-y",
@@ -66,59 +66,36 @@ run(
     input,
     "-an",
     "-vf",
-    "scale=-2:720,fps=30",
+    "scale=-2:1080,fps=60",
     "-c:v",
     "libx264",
     "-profile:v",
     "main",
     "-level",
-    "3.1",
+    "4.2",
     "-pix_fmt",
     "yuv420p",
     "-preset",
     "veryfast",
+    "-tune",
+    "fastdecode",
+    // Cap bitrate spikes (helps mobile decoders / thermal throttling).
+    "-maxrate",
+    "4500k",
+    "-bufsize",
+    "9000k",
+    // Reduce decode complexity a bit.
+    "-x264-params",
+    "ref=1:bframes=0:weightp=0:keyint=120:min-keyint=60",
     "-crf",
     "24",
-    "-tune",
-    "fastdecode",
     "-movflags",
     "+faststart",
-    out720,
+    out1080,
   ],
-  "720p"
-);
-
-// 480p mobile/low-end (baseline profile for broad compatibility)
-run(
-  [
-    "-y",
-    "-i",
-    input,
-    "-an",
-    "-vf",
-    "scale=-2:480,fps=24",
-    "-c:v",
-    "libx264",
-    "-profile:v",
-    "baseline",
-    "-level",
-    "3.0",
-    "-pix_fmt",
-    "yuv420p",
-    "-preset",
-    "veryfast",
-    "-crf",
-    "28",
-    "-tune",
-    "fastdecode",
-    "-movflags",
-    "+faststart",
-    out480,
-  ],
-  "480p"
+  "1080p60"
 );
 
 console.log("\nGenerated:");
 console.log(`- ${path.relative(projectRoot, poster)}`);
-console.log(`- ${path.relative(projectRoot, out720)}`);
-console.log(`- ${path.relative(projectRoot, out480)}`);
+console.log(`- ${path.relative(projectRoot, out1080)}`);
