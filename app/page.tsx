@@ -40,9 +40,6 @@ type GlassButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   surfaceProps?: Partial<GlassSurfaceProps>;
 };
 
-const MIN_DISCOUNT = 21;
-const MAX_DISCOUNT = 31;
-
 const DISCOUNT_STORAGE_KEY = "cvad:discounts:v1";
 const LAST_SUBMISSION_KEY_STORAGE_KEY = "cvad:lastSubmissionKey:v1";
 
@@ -222,42 +219,13 @@ export default function Home() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!isFormValid || isGenerating) return;
 
-    const { normalizedName, normalizedPhone, submissionKey } = buildSubmissionKey();
-    const store = getDiscountStore();
-    const mergedKeys = new Set([...Object.keys(store), ...Object.keys(generatedDiscounts)]);
-
-    const hasDuplicate = Array.from(mergedKeys).some((key) => {
-      const [existingName, existingPhone] = key.split("|");
-      if (key === submissionKey) return false;
-      return existingName === normalizedName || existingPhone === normalizedPhone;
-    });
-
-    const cachedDiscount = store[submissionKey] ?? generatedDiscounts[submissionKey];
-
-    if (hasDuplicate) {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      setIsGenerating(false);
-      setIsGeneratingModalOpen(false);
-      setIsResultModalOpen(false);
-      setFormError("A discount already exists for this name or phone number.");
-      return;
-    }
-
-    if (cachedDiscount) {
-      setActiveSubmissionKey(submissionKey);
-      setLastSubmissionKey(submissionKey);
-      setRevealedDiscount(cachedDiscount);
-      setFormError(null);
-      setIsGenerating(false);
-      setIsGeneratingModalOpen(false);
-      setIsResultModalOpen(true);
-      return;
-    }
+    const { submissionKey } = buildSubmissionKey();
+    const name = formData.name.trim();
+    const phone = formData.phone.trim();
+    const carModel = formData.carModel.trim();
 
     setIsGenerating(true);
     setIsGeneratingModalOpen(true);
@@ -269,22 +237,61 @@ export default function Home() {
     }
 
     timeoutRef.current = setTimeout(() => {
-      const discount =
-        Math.floor(Math.random() * (MAX_DISCOUNT - MIN_DISCOUNT + 1)) + MIN_DISCOUNT;
-      setActiveSubmissionKey(submissionKey);
-      setLastSubmissionKey(submissionKey);
-      setGeneratedDiscounts((prev) => ({ ...prev, [submissionKey]: discount }));
-      setRevealedDiscount(discount);
-      setFormError(null);
-      setIsGenerating(false);
-      setIsGeneratingModalOpen(false);
-      setIsResultModalOpen(true);
+      void (async () => {
+        try {
+          const response = await fetch("/api/discounts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, phone, carModel }),
+          });
+
+          if (response.status === 409) {
+            setFormError("A discount already exists for this name or phone number.");
+            setIsGenerating(false);
+            setIsGeneratingModalOpen(false);
+            setIsResultModalOpen(false);
+            return;
+          }
+
+          if (!response.ok) {
+            setFormError("Unable to generate a discount right now. Please try again.");
+            setIsGenerating(false);
+            setIsGeneratingModalOpen(false);
+            setIsResultModalOpen(false);
+            return;
+          }
+
+          const payload = (await response.json()) as { status?: string; discount?: number };
+          const discount = typeof payload.discount === "number" ? payload.discount : null;
+          if (discount === null) {
+            setFormError("Unable to generate a discount right now. Please try again.");
+            setIsGenerating(false);
+            setIsGeneratingModalOpen(false);
+            setIsResultModalOpen(false);
+            return;
+          }
+
+          setActiveSubmissionKey(submissionKey);
+          setLastSubmissionKey(submissionKey);
+          setGeneratedDiscounts((prev) => ({ ...prev, [submissionKey]: discount }));
+          setRevealedDiscount(discount);
+          setFormError(null);
+          setIsGenerating(false);
+          setIsGeneratingModalOpen(false);
+          setIsResultModalOpen(true);
+        } catch {
+          setFormError("Unable to generate a discount right now. Please try again.");
+          setIsGenerating(false);
+          setIsGeneratingModalOpen(false);
+          setIsResultModalOpen(false);
+        }
+      })();
     }, 1600);
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    handleGenerate();
+    void handleGenerate();
   };
 
   const handleExplore = () => {
