@@ -16,8 +16,18 @@ const normalizePhone = (value: string) => value.replace(/\D/g, "");
 const normalizeCarModel = (value: string) => value.trim();
 
 export async function POST(request: Request) {
-  const supabaseAdmin = getSupabaseAdmin();
-  const discountsTableName = getDiscountsTableName();
+  let supabaseAdmin: ReturnType<typeof getSupabaseAdmin>;
+  let discountsTableName: string;
+  try {
+    supabaseAdmin = getSupabaseAdmin();
+    discountsTableName = getDiscountsTableName();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Server misconfigured";
+    return NextResponse.json(
+      { status: "misconfigured", message },
+      { status: 500 }
+    );
+  }
 
   let body: RequestBody;
   try {

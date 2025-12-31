@@ -254,7 +254,41 @@ export default function Home() {
           }
 
           if (!response.ok) {
-            setFormError("Unable to generate a discount right now. Please try again.");
+            let payload: unknown = null;
+            try {
+              payload = await response.json();
+            } catch {
+              payload = null;
+            }
+
+            const messageFromServer =
+              payload &&
+              typeof payload === "object" &&
+              "message" in payload &&
+              typeof (payload as { message?: unknown }).message === "string"
+                ? (payload as { message: string }).message
+                : null;
+
+            const statusFromServer =
+              payload &&
+              typeof payload === "object" &&
+              "status" in payload &&
+              typeof (payload as { status?: unknown }).status === "string"
+                ? (payload as { status: string }).status
+                : null;
+
+            console.error("Discount API error", {
+              httpStatus: response.status,
+              status: statusFromServer,
+              message: messageFromServer,
+              payload,
+            });
+
+            setFormError(
+              statusFromServer === "misconfigured" && messageFromServer
+                ? messageFromServer
+                : "Unable to generate a discount right now. Please try again."
+            );
             setIsGenerating(false);
             setIsGeneratingModalOpen(false);
             setIsResultModalOpen(false);
