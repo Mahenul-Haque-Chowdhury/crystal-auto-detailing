@@ -509,7 +509,7 @@ export default function Home() {
               )}
 
               <p className="text-[11px] text-white/50 md:text-xs">
-                This discount is generated randomly by  our system.
+                This discount is system-generated. Any misuse or forgery will void it.
               </p>
             </form>
           </div>
