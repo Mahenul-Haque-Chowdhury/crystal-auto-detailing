@@ -345,13 +345,13 @@ export default function Home() {
       <div className="backdrop-fade fixed inset-0" />
 
       <div className="relative z-10 flex min-h-svh flex-col items-center justify-center gap-6 px-6 pt-20 pb-10 text-center md:px-12 md:pt-24 md:pb-12">
-        <div className="pointer-events-none absolute inset-x-0 -top-2 flex flex-col items-center text-center text-xs font-semibold uppercase tracking-[0.55em] text-white drop-shadow-[0_8px_26px_rgba(0,0,0,0.65)]">
+        <div className="pointer-events-none absolute inset-x-0 top-2 flex flex-col items-center text-center text-xs font-semibold uppercase tracking-[0.55em] text-white drop-shadow-[0_8px_26px_rgba(0,0,0,0.65)]">
           <Image
             src={LOGO_SRC}
             alt="Crystal Valley Auto Detail logo"
             width={400}
             height={400}
-            className="h-40 w-40 object-contain"
+            className="h-[184px] w-[184px] object-contain"
             priority
           />
         </div>
