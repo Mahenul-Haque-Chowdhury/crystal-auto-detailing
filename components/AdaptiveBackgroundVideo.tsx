@@ -115,9 +115,22 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
 
   const src = useMemo(() => {
     if (tier === "off") return null;
-    // Android uses optimized mobile video; PC and iOS use full quality
-    return isAndroid ? "/background-1080c.mp4" : "/background.mp4";
+    // Android uses optimized 720p mobile video (9:20 aspect); PC and iOS use full quality
+    return isAndroid ? "/background720.mp4" : "/background.mp4";
   }, [tier, isAndroid]);
+
+  // Android video is 9:20 ratio, screens vary (9:16 to 9:19). We need extra width to cover.
+  // 9:20 = 0.45 aspect, 9:16 = 0.5625 aspect. Video is narrower, so we scale width up.
+  // Using min-w to ensure the video always covers the viewport width.
+  const videoClassName = useMemo(() => {
+    const baseClasses = "media-guard pointer-events-none absolute inset-0 object-cover object-center opacity-0 transition-opacity duration-1000 ease-out motion-reduce:transition-none data-[ready=true]:opacity-100";
+    if (isAndroid) {
+      // For 9:20 video on ~9:16 screens: scale width to fill, crop top/bottom
+      return `${baseClasses} h-full w-auto min-w-full left-1/2 -translate-x-1/2 ${className}`.trim();
+    }
+    // Desktop/iOS: standard cover behavior with slight overflow for edge anti-aliasing
+    return `${baseClasses} h-[101%] w-[101%] -translate-x-[0.5%] -translate-y-[0.5%] ${className}`.trim();
+  }, [isAndroid, className]);
 
   useEffect(() => {
     if (typeof navigator === "undefined") return;
@@ -252,7 +265,7 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
     <video
       ref={videoRef}
       data-ready="false"
-      className={`media-guard pointer-events-none absolute inset-0 h-[101%] w-[101%] -translate-x-[0.5%] -translate-y-[0.5%] object-cover object-center opacity-0 transition-opacity duration-1000 ease-out motion-reduce:transition-none data-[ready=true]:opacity-100 ${className}`.trim()}
+      className={videoClassName}
       loop
       muted
       playsInline
