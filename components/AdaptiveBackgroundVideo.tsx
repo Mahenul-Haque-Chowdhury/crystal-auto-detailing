@@ -48,12 +48,16 @@ function getVideoTier(): VideoTier {
   // Default: Android tends to struggle more with 1080p60.
   const ua = navigator.userAgent ?? "";
   const isAndroid = /Android/i.test(ua);
-  if (isAndroid) return "p720";
+  if (isAndroid) return "p540";
 
   return "p1080";
 }
 
-export default function AdaptiveBackgroundVideo() {
+type AdaptiveBackgroundVideoProps = {
+  className?: string;
+};
+
+export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBackgroundVideoProps) {
   const [tier, setTier] = useState<VideoTier>(() => getVideoTier());
   const [shouldLoad, setShouldLoad] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -243,7 +247,7 @@ export default function AdaptiveBackgroundVideo() {
     <video
       ref={videoRef}
       data-ready="false"
-      className="media-guard fixed inset-0 h-svh w-screen object-cover opacity-0 transition-opacity duration-1000 ease-out motion-reduce:transition-none data-[ready=true]:opacity-100"
+      className={`media-guard pointer-events-none absolute inset-0 h-dvh w-full object-cover opacity-0 transition-opacity duration-1000 ease-out motion-reduce:transition-none data-[ready=true]:opacity-100 ${className}`.trim()}
       loop
       muted
       playsInline
