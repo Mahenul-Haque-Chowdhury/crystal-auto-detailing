@@ -340,37 +340,53 @@ export default function Home() {
   };
 
   return (
-    <main className="relative h-dvh overflow-hidden text-white">
-      <Image
-        src="/background-poster.jpg"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="absolute inset-0 object-cover"
-      />
-      <AdaptiveBackgroundVideo className="absolute inset-0 h-dvh w-full object-cover" />
-      <div className="backdrop-fade absolute inset-0" />
+    <main className="relative min-h-dvh overflow-hidden text-white">
+      <section className="relative h-dvh min-h-svh">
+        <div className="absolute inset-0 h-full w-full overflow-hidden">
+          <Image
+            src="/background-poster.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="absolute inset-0 scale-105 object-cover object-center"
+          />
+          <AdaptiveBackgroundVideo className="absolute inset-0 h-full w-full scale-105 object-cover object-center" />
+        </div>
+        <div className="backdrop-fade absolute inset-0" />
 
-      <div className="relative z-10 flex h-dvh flex-col px-6 pt-16 pb-14 text-center md:px-12 md:pt-20 md:pb-16">
-        <div className="flex flex-1 flex-col items-center justify-center gap-5">
-          <div className="pointer-events-none flex flex-col items-center drop-shadow-[0_8px_26px_rgba(0,0,0,0.65)]">
+        <div className="relative z-10 flex h-dvh min-h-svh flex-col items-center justify-center gap-4 px-6 pt-[env(safe-area-inset-top,20px)] pb-[calc(env(safe-area-inset-bottom,10px)+120px)] text-center md:gap-6 md:px-12 md:pt-24 md:pb-12">
+          <div className="pointer-events-none absolute inset-x-0 top-[env(safe-area-inset-top,12px)] flex flex-col items-center text-center text-xs font-semibold uppercase tracking-[0.55em] text-white drop-shadow-[0_8px_26px_rgba(0,0,0,0.65)] md:top-2">
             <Image
               src={LOGO_SRC}
               alt="Crystal Valley Auto Detail logo"
               width={400}
               height={400}
-              className="h-[156px] w-[156px] object-contain sm:h-[184px] sm:w-[184px]"
+              className="h-[140px] w-[140px] object-contain sm:h-44 sm:w-44 md:h-[210px] md:w-[210px]"
               priority
             />
           </div>
 
-          <h1 className={`${migra.className} space-y-3 text-3xl font-[510] leading-tight md:text-6xl`}>
+          <h1 className={`${migra.className} mt-16 space-y-2 text-2xl font-[510] leading-tight sm:mt-20 sm:space-y-3 sm:text-3xl md:mt-0 md:text-6xl`}>
             <span className="block">Revive</span>
             <span className="block">Refresh</span>
             <span className="block">Reimagine Your Ride</span>
           </h1>
 
+          {/* Mobile: Founder's Message button right under headline */}
+          <div className="mt-4 flex md:hidden">
+            <GlassButton
+              type="button"
+              className="px-4 py-2 text-[11px] font-semibold tracking-[0.02em] text-white normal-case sm:text-xs"
+              surfaceClassName="inline-flex mx-auto max-w-fit"
+              surfaceProps={{ tint: "rgba(255, 255, 255, 0.16)", backgroundOpacity: 0.18, blur: 18 }}
+              onClick={() => setIsStoryOpen(true)}
+            >
+              Founder&apos;s Message
+            </GlassButton>
+          </div>
+
+          {/* Desktop: Explore Discount button */}
           <div className="hidden gap-4 md:flex">
             <GlassButton
               type="button"
@@ -381,47 +397,38 @@ export default function Home() {
               Explore Discount
             </GlassButton>
           </div>
-        </div>
 
-        <div className="absolute inset-x-0 bottom-10 z-20 flex flex-col items-center gap-3 px-6 md:hidden">
-          <GlassButton
-            type="button"
-            className="px-4 py-2 text-xs font-semibold tracking-[0.02em] text-white normal-case"
-            surfaceClassName="inline-flex mx-auto max-w-fit"
-            surfaceProps={{ tint: "rgba(255, 255, 255, 0.16)", backgroundOpacity: 0.18, blur: 18 }}
-            onClick={() => setIsStoryOpen(true)}
-          >
-            Founder’s Message
-          </GlassButton>
-
-          {!isDiscountOpen && !isStoryOpen && (
-            <GlassButton
-              type="button"
-              className="glow-ring w-full max-w-sm px-6 py-3 text-base tracking-[0.35em] text-white"
-              surfaceClassName="w-full max-w-sm"
-              surfaceProps={{ tint: "rgba(255, 255, 255, 0.16)", backgroundOpacity: 0.18, blur: 18 }}
-              onClick={handleExplore}
-            >
-              Explore Discount
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+{/* Mobile: Explore Discount button fixed at bottom */}
+          <div className="absolute inset-x-0 bottom-[calc(env(safe-area-inset-bottom,10px)+40px)] z-20 flex flex-col items-center gap-2.5 px-5 sm:bottom-14 sm:gap-3 sm:px-6 md:hidden">
+            {!isDiscountOpen && !isStoryOpen && (
+              <GlassButton
+                type="button"
+                className="glow-ring w-full max-w-[320px] px-5 py-2.5 text-sm tracking-[0.25em] text-white sm:max-w-sm sm:px-6 sm:py-3 sm:text-base sm:tracking-[0.35em]"
+                surfaceClassName="w-full max-w-[320px] sm:max-w-sm"
+                surfaceProps={{ tint: "rgba(255, 255, 255, 0.16)", backgroundOpacity: 0.18, blur: 18 }}
+                onClick={handleExplore}
               >
-                <path
-                  d="M12 5v14m0 0 6-6m-6 6-6-6"
-                  stroke="#000"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </GlassButton>
-          )}
+                Explore Discount
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 5v14m0 0 6-6m-6 6-6-6"
+                    stroke="#000"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </GlassButton>
+            )}
+          </div>
         </div>
-      </div>
+      </section>
 
       <div className="fixed bottom-8 right-6 z-20 hidden md:flex">
         <GlassButton
@@ -703,13 +710,13 @@ export default function Home() {
         </div>
       </aside>
 
-      <div className="pointer-events-auto fixed bottom-3 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center text-center text-[10px] text-white/60 md:text-[11px]">
+      <div className="pointer-events-auto fixed bottom-[calc(env(safe-area-inset-bottom,4px)+4px)] left-1/2 z-30 flex -translate-x-1/2 flex-col items-center text-center text-[9px] text-white/50 sm:text-[10px] md:bottom-3 md:text-[11px] md:text-white/60">
         <span>Developed by</span>
         <a
           href="https://grayvally.tech"
           target="_blank"
           rel="noreferrer noopener"
-          className="font-semibold text-white underline-offset-2 hover:underline"
+          className="font-semibold text-white/80 underline-offset-2 hover:underline md:text-white"
         >
           GrayVally Software Solutions
         </a>

@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   images: {
-    localPatterns: [{ pathname: "/ghora1.png" }],
+    localPatterns: [{ pathname: "/*" }],
   },
 };
 

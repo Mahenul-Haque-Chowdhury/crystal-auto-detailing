@@ -247,7 +247,7 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
     <video
       ref={videoRef}
       data-ready="false"
-      className={`media-guard pointer-events-none absolute inset-0 h-dvh w-full object-cover opacity-0 transition-opacity duration-1000 ease-out motion-reduce:transition-none data-[ready=true]:opacity-100 ${className}`.trim()}
+      className={`media-guard pointer-events-none absolute inset-0 h-[101%] w-[101%] -translate-x-[0.5%] -translate-y-[0.5%] object-cover object-center opacity-0 transition-opacity duration-1000 ease-out motion-reduce:transition-none data-[ready=true]:opacity-100 ${className}`.trim()}
       loop
       muted
       playsInline

@@ -56,6 +56,33 @@ input[type="reset"]:disabled,
   pointer-events: none;
 }
 
+/* Mobile-first safe area support */
+@supports (padding: env(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Android-specific viewport fix */
+@supports (-webkit-touch-callout: none) or (height: 100dvh) {
+  html, body {
+    height: 100dvh;
+  }
+}
+
+/* Ensure background video and images fill viewport on all devices */
+.bg-cover-fix {
+  position: absolute;
+  inset: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  object-fit: cover;
+  object-position: center;
+}
+
 @keyframes pulseGlow {
   0% {
     box-shadow: 0 0 0 rgba(94, 234, 212, 0.35);
