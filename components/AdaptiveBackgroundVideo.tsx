@@ -107,12 +107,17 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
     };
   }, [shouldLoad, tier]);
 
+  // Determine if user is on Android (mobile) vs PC/iOS
+  const isAndroid = useMemo(() => {
+    if (typeof navigator === "undefined") return false;
+    return /Android/i.test(navigator.userAgent ?? "");
+  }, []);
+
   const src = useMemo(() => {
-    if (tier === "p1080") return "/background-1080.mp4";
-    if (tier === "p720") return "/background-720.mp4";
-    if (tier === "p540") return "/background-540.mp4";
-    return null;
-  }, [tier]);
+    if (tier === "off") return null;
+    // Android uses optimized mobile video; PC and iOS use full quality
+    return isAndroid ? "/background-1080c.mp4" : "/background.mp4";
+  }, [tier, isAndroid]);
 
   useEffect(() => {
     if (typeof navigator === "undefined") return;
@@ -263,7 +268,6 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
       onContextMenu={(event) => event.preventDefault()}
     >
       {shouldLoad && src ? <source src={src} type="video/mp4" /> : null}
-      {shouldLoad ? <source src="/background.mp4" type="video/mp4" /> : null}
     </video>
   );
 }
