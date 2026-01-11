@@ -115,15 +115,11 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
 
   const src = useMemo(() => {
     if (tier === "off") return null;
-    // Android uses optimized mobile video; PC and iOS use full quality
-    return isAndroid ? "/backgroundp.webm" : "/background.mp4";
+    // Android uses optimized H.264 mobile video; PC and iOS use full quality
+    return isAndroid ? "/backgroundp_4.mp4" : "/background.mp4";
   }, [tier, isAndroid]);
 
-  const sourceType = useMemo(() => {
-    if (!src) return null;
-    if (src.endsWith(".webm")) return "video/webm";
-    return "video/mp4";
-  }, [src]);
+  const sourceType = "video/mp4";
 
   // Android video is 9:20 ratio, screens vary (9:16 to 9:19). We need extra width to cover.
   // 9:20 = 0.45 aspect, 9:16 = 0.5625 aspect. Video is narrower, so we scale width up.
