@@ -116,7 +116,7 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
   const src = useMemo(() => {
     if (tier === "off") return null;
     // Android uses optimized 720p mobile video (9:20 aspect); PC and iOS use full quality
-    return isAndroid ? "/background720.mp4" : "/background.mp4";
+    return isAndroid ? "/backgroundp.mp4" : "/background.mp4";
   }, [tier, isAndroid]);
 
   // Android video is 9:20 ratio, screens vary (9:16 to 9:19). We need extra width to cover.
