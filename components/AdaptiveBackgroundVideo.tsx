@@ -115,9 +115,15 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
 
   const src = useMemo(() => {
     if (tier === "off") return null;
-    // Android uses optimized 720p mobile video (9:20 aspect); PC and iOS use full quality
-    return isAndroid ? "/backgroundp.mp4" : "/background.mp4";
+    // Android uses optimized mobile video; PC and iOS use full quality
+    return isAndroid ? "/backgroundp.webm" : "/background.mp4";
   }, [tier, isAndroid]);
+
+  const sourceType = useMemo(() => {
+    if (!src) return null;
+    if (src.endsWith(".webm")) return "video/webm";
+    return "video/mp4";
+  }, [src]);
 
   // Android video is 9:20 ratio, screens vary (9:16 to 9:19). We need extra width to cover.
   // 9:20 = 0.45 aspect, 9:16 = 0.5625 aspect. Video is narrower, so we scale width up.
@@ -136,6 +142,7 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
     if (typeof navigator === "undefined") return;
     if (tier === "off") return;
     if (!shouldLoad) return;
+    if (isAndroid) return;
 
     const mc = (navigator as Navigator & {
       mediaCapabilities?: {
@@ -196,7 +203,7 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
     return () => {
       cancelled = true;
     };
-  }, [shouldLoad, tier]);
+  }, [shouldLoad, tier, isAndroid]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -266,10 +273,11 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
       ref={videoRef}
       data-ready="false"
       className={videoClassName}
+      autoPlay
       loop
       muted
       playsInline
-      preload={shouldLoad ? "metadata" : "none"}
+      preload={shouldLoad ? (isAndroid ? "auto" : "metadata") : "none"}
       poster="/background-poster.jpg"
       aria-hidden="true"
       controls={false}
@@ -280,7 +288,7 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
       tabIndex={-1}
       onContextMenu={(event) => event.preventDefault()}
     >
-      {shouldLoad && src ? <source src={src} type="video/mp4" /> : null}
+      {shouldLoad && src && sourceType ? <source src={src} type={sourceType} /> : null}
     </video>
   );
 }
