@@ -177,6 +177,17 @@ export default function AboutPage() {
                   <div className="text-slate-200/80">Founder</div>
                   <div className="text-slate-200/80">Crystal Valley Auto Detail</div>
                 </div>
+
+                <div className="pt-2">
+                  <a
+                    href="https://riffattonmoy.online/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center rounded-full border border-gold-300/40 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-gold-50 active:scale-95"
+                  >
+                    Visit Riffat Tonmoy&apos;s Portfolio
+                  </a>
+                </div>
               </div>
             </GlassSurface>
           </div>

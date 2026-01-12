@@ -8,6 +8,13 @@ const WARM_KEY = "cvad:bgVideoWarm:v1";
 const READY_EVENT = "cvad:bgVideoReady";
 const DISABLED_EVENT = "cvad:bgVideoDisabled";
 const ERROR_EVENT = "cvad:bgVideoError";
+const GATE_DONE_EVENT = "cvad:bgGateDone";
+
+const markGateDone = () => {
+  if (typeof window === "undefined") return;
+  (window as unknown as { __cvadBgGateDone?: boolean }).__cvadBgGateDone = true;
+  window.dispatchEvent(new Event(GATE_DONE_EVENT));
+};
 
 export default function BackgroundVideoGate() {
   const [show, setShow] = useState(() => {
@@ -20,6 +27,11 @@ export default function BackgroundVideoGate() {
   });
 
   useEffect(() => {
+    // If the gate is skipped (warm session), still unblock animations.
+    if (!show) markGateDone();
+  }, [show]);
+
+  useEffect(() => {
     if (!show) return;
 
     const markWarmAndHide = () => {
@@ -29,6 +41,7 @@ export default function BackgroundVideoGate() {
         // ignore
       }
       setShow(false);
+      markGateDone();
     };
 
     const onReady = () => markWarmAndHide();

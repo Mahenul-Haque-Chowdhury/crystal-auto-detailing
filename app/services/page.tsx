@@ -180,29 +180,47 @@ export default function ServicesPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    const isGateDone = () => (window as unknown as { __cvadBgGateDone?: boolean }).__cvadBgGateDone === true;
+
     const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     if (prefersReducedMotion) {
       setHeroTitleTyped(heroTitleFull);
       return;
     }
 
-    setHeroTitleTyped('');
-    let index = 0;
-    const startDelayMs = 200;
-    const perCharMs = 28;
+    let startTimer: number | null = null;
+    let interval: number | null = null;
 
-    const startTimer = window.setTimeout(() => {
-      const interval = window.setInterval(() => {
-        index += 1;
-        setHeroTitleTyped(heroTitleFull.slice(0, index));
-        if (index >= heroTitleFull.length) {
-          window.clearInterval(interval);
-        }
-      }, perCharMs);
-    }, startDelayMs);
+    const startTyping = () => {
+      setHeroTitleTyped('');
+      let index = 0;
+      const startDelayMs = 200;
+      const perCharMs = 28;
+
+      startTimer = window.setTimeout(() => {
+        interval = window.setInterval(() => {
+          index += 1;
+          setHeroTitleTyped(heroTitleFull.slice(0, index));
+          if (index >= heroTitleFull.length) {
+            if (interval) window.clearInterval(interval);
+            interval = null;
+          }
+        }, perCharMs);
+      }, startDelayMs);
+    };
+
+    const handleGateDone = () => startTyping();
+
+    if (isGateDone()) {
+      startTyping();
+    } else {
+      window.addEventListener('cvad:bgGateDone', handleGateDone as EventListener, { once: true } as AddEventListenerOptions);
+    }
 
     return () => {
-      window.clearTimeout(startTimer);
+      window.removeEventListener('cvad:bgGateDone', handleGateDone as EventListener);
+      if (startTimer) window.clearTimeout(startTimer);
+      if (interval) window.clearInterval(interval);
     };
   }, [heroTitleFull]);
 
