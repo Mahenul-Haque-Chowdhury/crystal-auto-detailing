@@ -486,8 +486,20 @@ export default function Home() {
     >
       <HeroSection migraClassName={migra.className} isDiscountOpen={isDiscountOpen} onExplore={handleExplore} />
 
+      {!isDiscountOpen && (
+        <div
+          className="pointer-events-none fixed left-1/2 z-20 w-full -translate-x-1/2 px-6 text-center"
+          style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)" }}
+        >
+          <p className="text-[11px] font-medium tracking-wide text-white/70 md:text-xs">
+            Designed &amp; Built by{" "}
+            <span className="font-semibold text-white/85">GrayVally Software Solutions</span>
+          </p>
+        </div>
+      )}
+
       <div
-        className={`fixed inset-0 z-30 flex items-start justify-center overflow-y-auto px-3 py-4 transition sm:px-4 md:items-center md:px-6 md:py-0 ${
+        className={`fixed inset-0 z-30 flex items-start justify-center overflow-y-auto px-3 pb-4 pt-[calc(env(safe-area-inset-top,0px)+72px)] transition sm:px-4 md:items-center md:px-6 md:py-0 md:pt-0 ${
           isDiscountOpen ? "pointer-events-auto" : "pointer-events-none"
         }`}
         aria-hidden={!isDiscountOpen}
