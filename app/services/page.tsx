@@ -1,0 +1,1145 @@
+'use client';
+
+import React, { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import GlassSurface from '@/components/GlassSurface';
+import { PageWrapper, SectionTransition } from '@/components/animations/PageTransition';
+import { ScrollReveal } from '@/components/animations/ScrollReveal';
+import { AnimatedCard } from '@/components/animations/AnimatedCard';
+import { SlideIn } from '@/components/animations/SlideIn';
+import { FadeIn } from '@/components/animations/FadeIn';
+import {
+  CalendarClock,
+  Car,
+  Check,
+  ChevronDown,
+  Clipboard,
+  Phone,
+  ShieldCheck,
+  Sparkles,
+  User,
+  Wrench,
+  MapPin,
+  Leaf,
+  Clock,
+  Briefcase,
+  Droplets,
+} from 'lucide-react';
+
+function WhatsAppLogo({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill="currentColor"
+    >
+      <path d="M12.04 2.01c-5.52 0-10 4.48-10 10 0 1.77.46 3.5 1.34 5.02L2 22l5.12-1.34c1.47.8 3.12 1.22 4.79 1.22h.01c5.52 0 10-4.48 10-10 0-2.65-1.03-5.14-2.9-7.01a9.94 9.94 0 0 0-7.02-2.86Zm5.78 14.49c-.24.68-1.39 1.31-1.92 1.39-.49.08-1.11.11-1.8-.11-.42-.14-.96-.31-1.65-.6-2.9-1.25-4.79-4.19-4.93-4.39-.14-.2-1.18-1.57-1.18-3 0-1.43.75-2.13 1.01-2.42.26-.29.57-.36.76-.36h.55c.18 0 .42-.07.66.5.24.58.82 2.01.89 2.16.07.14.12.31.02.5-.1.2-.15.31-.29.48-.14.17-.31.38-.45.51-.14.14-.28.29-.12.57.16.29.72 1.18 1.55 1.91 1.07.95 1.98 1.25 2.26 1.39.29.14.46.12.63-.07.17-.2.72-.84.91-1.13.19-.29.38-.24.63-.14.26.1 1.63.77 1.91.91.28.14.46.22.53.34.07.12.07.7-.17 1.38Z" />
+    </svg>
+  );
+}
+
+type ServiceOption =
+  | 'Basic Wash'
+  | 'Super Wash & Interior'
+  | 'Single-Stage Polish'
+  | 'Glass Polish'
+  | 'Basic Ceramic (6-9 Months)'
+  | 'Ceramic Care+ (18-24 Months)';
+type CarTypeOption = 'Sedan' | 'SUV' | 'Microbus';
+
+type FormState = {
+  service: ServiceOption;
+  carType: CarTypeOption;
+  fullName: string;
+  phone: string;
+  address: string;
+  dateTimeLocal: string;
+};
+
+const WHATSAPP_NUMBER = '8801XXXXXXXXX';
+const PHONE_NUMBER_DISPLAY = '+8801XXXXXXXXX';
+const PHONE_NUMBER_TEL = '+8801XXXXXXXXX';
+
+function classNames(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(' ');
+}
+
+function formatBDT(amount: number) {
+  return `${amount.toLocaleString('en-US')} BDT`;
+}
+
+type VehicleKind = 'sedan' | 'suv' | 'microbus';
+
+function VehicleChip({
+  kind,
+  label,
+  subLabel,
+}: {
+  kind: VehicleKind;
+  label: string;
+  subLabel?: string;
+}) {
+  const Icon = kind === 'sedan' ? SedanIcon : kind === 'suv' ? SuvIcon : MicrobusIcon;
+
+  return (
+    <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2">
+      <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gold-400/20 bg-slate-950/60 text-gold-300">
+        <Icon className="h-5 w-5" />
+      </span>
+      <div className="leading-tight">
+        <div className="text-sm font-semibold text-slate-100">{label}</div>
+        {subLabel ? <div className="text-[11px] text-slate-200/70">{subLabel}</div> : null}
+      </div>
+    </div>
+  );
+}
+
+type EstimatedPrice = { kind: 'exact'; amount: number } | { kind: 'from'; amount: number };
+
+function getEstimatedPrice(service: ServiceOption, carType: CarTypeOption): EstimatedPrice | null {
+  switch (service) {
+    case 'Basic Wash':
+      return {
+        kind: 'exact',
+        amount: carType === 'Sedan' ? 700 : 900,
+      };
+    case 'Super Wash & Interior':
+      return {
+        kind: 'exact',
+        amount: carType === 'Sedan' ? 1200 : 1500,
+      };
+    case 'Single-Stage Polish':
+      return {
+        kind: 'exact',
+        amount: carType === 'Sedan' ? 4500 : carType === 'SUV' ? 5500 : 6500,
+      };
+    case 'Basic Ceramic (6-9 Months)':
+      return {
+        kind: 'exact',
+        amount: carType === 'Sedan' ? 8000 : 10000,
+      };
+    case 'Ceramic Care+ (18-24 Months)':
+      return {
+        kind: 'exact',
+        amount: carType === 'Sedan' ? 10000 : carType === 'SUV' ? 12500 : 13000,
+      };
+    case 'Glass Polish':
+      return { kind: 'from', amount: 600 };
+    default:
+      return null;
+  }
+}
+
+export default function ServicesPage() {
+  // Bump this string if you replace images in /public but the browser keeps showing the old cached version.
+  const serviceImageVersion = '2026-01-13-1';
+
+  const heroTitleFull = 'We Bring Premium Car Detailing at Your Doorstep.';
+  const [heroTitleTyped, setHeroTitleTyped] = useState('');
+
+  const heroHighlightWord = 'Doorstep';
+  const heroHighlightIndex = heroTitleFull.indexOf(heroHighlightWord);
+
+  const [form, setForm] = useState<FormState>({
+    service: 'Basic Wash',
+    carType: 'Sedan',
+    fullName: '',
+    phone: '',
+    address: '',
+    dateTimeLocal: '',
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState<
+    | { type: 'idle' }
+    | { type: 'success'; message: string }
+    | { type: 'error'; message: string }
+  >({ type: 'idle' });
+
+  const minDateTime = useMemo(() => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    const mm = pad(now.getMonth() + 1);
+    const dd = pad(now.getDate());
+    const hh = pad(now.getHours());
+    const mi = pad(now.getMinutes());
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+  }, []);
+
+  const estimatedPrice = useMemo(() => getEstimatedPrice(form.service, form.carType), [form.service, form.carType]);
+
+  const investmentLabel = useMemo(() => {
+    if (!estimatedPrice) return '—';
+    if (estimatedPrice.kind === 'exact') return formatBDT(estimatedPrice.amount);
+    return `From ${formatBDT(estimatedPrice.amount)}`;
+  }, [estimatedPrice]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    if (prefersReducedMotion) {
+      setHeroTitleTyped(heroTitleFull);
+      return;
+    }
+
+    setHeroTitleTyped('');
+    let index = 0;
+    const startDelayMs = 200;
+    const perCharMs = 28;
+
+    const startTimer = window.setTimeout(() => {
+      const interval = window.setInterval(() => {
+        index += 1;
+        setHeroTitleTyped(heroTitleFull.slice(0, index));
+        if (index >= heroTitleFull.length) {
+          window.clearInterval(interval);
+        }
+      }, perCharMs);
+    }, startDelayMs);
+
+    return () => {
+      window.clearTimeout(startTimer);
+    };
+  }, [heroTitleFull]);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setStatus({ type: 'idle' });
+
+    if (!form.fullName.trim() || !form.phone.trim() || !form.address.trim() || !form.dateTimeLocal) {
+      setStatus({ type: 'error', message: 'Please fill out all required fields.' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // TODO: Supabase Integration
+      // - Insert booking request into your Supabase table here.
+      // - Example shape:
+      //   const payload = {
+      //     service: form.service,
+      //     car_type: form.carType,
+      //     full_name: form.fullName,
+      //     phone: form.phone,
+      //     address: form.address,
+      //     requested_datetime: form.dateTimeLocal,
+      //     created_at: new Date().toISOString(),
+      //   };
+      // - Then call your Supabase client to `insert(payload)`.
+
+      await new Promise((r) => setTimeout(r, 450));
+
+      setStatus({
+        type: 'success',
+        message: 'Request submitted. We’ll contact you shortly to confirm the booking.',
+      });
+      setForm((prev) => ({
+        ...prev,
+        fullName: '',
+        phone: '',
+        address: '',
+        dateTimeLocal: '',
+      }));
+    } catch {
+      setStatus({
+        type: 'error',
+        message: 'Something went wrong. Please try again in a moment.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  const vehicleTypes = [
+    { kind: 'sedan', label: 'Sedan' },
+    { kind: 'suv', label: 'SUV' },
+    { kind: 'microbus', label: 'Microbus', subLabel: 'Noah • Hiace' },
+  ] satisfies ReadonlyArray<{ kind: VehicleKind; label: string; subLabel?: string }>;
+
+  const serviceCategories = [
+    {
+      key: 'wash',
+      icon: <Sparkles className="h-5 w-5 text-gold-300" aria-hidden="true" />,
+      title: 'Wash Packages',
+      blurb: 'Quick refresh to deep clean—safe products, spotless finish.',
+      services: [
+        { title: 'Basic Wash', detail: 'Exterior wash, rinse, tire & rim cleaning.' },
+        { title: 'Super Wash & Interior', detail: 'Exterior + interior wipe-down & vacuum.' },
+      ],
+    },
+    {
+      key: 'polish',
+      icon: <Car className="h-5 w-5 text-gold-300" aria-hidden="true" />,
+      title: 'Polish & Glass Care',
+      blurb: 'Restore clarity and shine—reduce haze, swirls, and water spots.',
+      services: [
+        { title: 'Single-Stage Polish', detail: 'Gloss enhancement & swirl reduction.' },
+        { title: 'Glass Polish', detail: 'Windshield, side & rear glass clarity treatment.' },
+      ],
+    },
+    {
+      key: 'ceramic',
+      icon: <ShieldCheck className="h-5 w-5 text-gold-300" aria-hidden="true" />,
+      title: 'Ceramic Protection',
+      blurb: 'Hydrophobic protection with long-lasting gloss & easier wash.',
+      services: [
+        { title: 'Basic Ceramic (6–9 Months)', detail: 'Entry ceramic layer for daily drivers.' },
+        { title: 'Ceramic Care+ (18–24 Months)', detail: 'Extended durability, premium finish.' },
+      ],
+    },
+  ] as const;
+
+  const processSteps = [
+    {
+      key: 'confirmation',
+      icon: <Phone className="h-5 w-5" aria-hidden="true" />,
+      title: 'Confirmation',
+      description: 'We call you to confirm the booking timing and share our availability.',
+    },
+    {
+      key: 'inspection',
+      icon: <Clipboard className="h-5 w-5" aria-hidden="true" />,
+      title: 'Inspection & Assessment',
+      description: 'We check your vehicle condition, paint, and priority areas before starting.',
+    },
+    {
+      key: 'deep-clean',
+      icon: <Sparkles className="h-5 w-5" aria-hidden="true" />,
+      title: 'Deep Cleaning & Polishing',
+      description: 'Thorough wash and detail work using safe products and proven methods.',
+    },
+    {
+      key: 'handover',
+      icon: <ShieldCheck className="h-5 w-5" aria-hidden="true" />,
+      title: 'Final Inspection & Handover',
+      description: 'We verify results, share care tips, and hand over a spotless finish.',
+    },
+  ] as const;
+
+  return (
+    <PageWrapper>
+      <main className="bg-transparent font-sans text-slate-100">
+        {/* Hero + Booking */}
+        <section className="bg-transparent">
+          <div className="mx-auto w-full max-w-[1400px] px-4 py-12 sm:py-16">
+            <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
+              <motion.div 
+                className="space-y-6"
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <h1
+                className="text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl"
+                aria-label={heroTitleFull}
+              >
+                <span className="sr-only">{heroTitleFull}</span>
+                <span aria-hidden="true">
+                  {/* Mobile: force 3 lines, keep Doorstep last */}
+                  <span className="block md:hidden">
+                    <span className="block">We Bring Premium</span>
+                    <span className="block">Car Detailing at Your</span>
+                    <span className="block text-polish-gold">Doorstep.</span>
+                  </span>
+
+                  {/* Desktop: typed headline with highlighted Doorstep */}
+                  <span className="hidden md:inline">
+                    {!heroTitleTyped ? (
+                      <span>{'\u00A0'}</span>
+                    ) : heroHighlightIndex >= 0 ? (
+                      <>
+                        <span>
+                          {heroTitleTyped.slice(0, Math.min(heroTitleTyped.length, heroHighlightIndex))}
+                        </span>
+                        <span className="text-polish-gold">
+                          {heroTitleTyped.slice(
+                            heroHighlightIndex,
+                            Math.min(heroTitleTyped.length, heroHighlightIndex + heroHighlightWord.length)
+                          )}
+                        </span>
+                        <span>
+                          {heroTitleTyped.slice(
+                            Math.min(heroTitleTyped.length, heroHighlightIndex + heroHighlightWord.length)
+                          )}
+                        </span>
+                      </>
+                    ) : (
+                      <span>{heroTitleTyped}</span>
+                    )}
+                    <span
+                      className="ml-0.5 inline-block w-[0.55ch] animate-pulse rounded-sm bg-gold-200/80 align-[0.1em]"
+                      aria-hidden="true"
+                    />
+                  </span>
+                </span>
+              </h1>
+
+              <p className="max-w-xl text-pretty text-sm leading-relaxed text-slate-200/90 sm:text-base">
+                We bring the showroom shine to you. Mobile service requiring only water &amp; electricity access.
+              </p>
+
+              <ul className="grid max-w-xl gap-3 text-sm text-slate-200/90 sm:text-base">
+                {[
+                  'Complete exterior body wash',
+                  'Tire and rim cleaning',
+                  'Underbody wash',
+                  'Glass and mirror cleaning',
+                ].map((item, index) => (
+                  <motion.li 
+                    key={item} 
+                    className="flex items-start gap-3"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 + index * 0.1, duration: 0.4 }}
+                  >
+                    <span className="mt-0.5 inline-flex h-6 w-6 flex-none items-center justify-center rounded-md border border-gold-400/30 bg-slate-950/60">
+                      <Check className="h-4 w-4 text-gold-300" aria-hidden="true" />
+                    </span>
+                    <span>{item}</span>
+                  </motion.li>
+                ))}
+              </ul>
+
+              <div className="flex flex-wrap gap-3">
+                <GlassSurface
+                  width="auto"
+                  height="auto"
+                  borderRadius={14}
+                  backgroundOpacity={0.18}
+                  saturation={1.35}
+                  blur={18}
+                  borderWidth={0.08}
+                  tint="rgba(2, 6, 23, 0.55)"
+                  className="inline-flex border border-gold-400/20"
+                  style={{ padding: 0 }}
+                >
+                  <a
+                    href={`tel:${PHONE_NUMBER_TEL}`}
+                    className="inline-flex items-center gap-2 rounded-[14px] bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+                    aria-label={`Call ${PHONE_NUMBER_DISPLAY}`}
+                  >
+                    <Phone className="h-4 w-4 text-gold-300" aria-hidden="true" />
+                    <span className="font-medium tracking-tight">Call {PHONE_NUMBER_DISPLAY}</span>
+                  </a>
+                </GlassSurface>
+                <a
+                  href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg border border-[#25D366]/40 bg-[#25D366] px-4 py-2 text-sm font-semibold text-black hover:brightness-110"
+                  aria-label="Chat on WhatsApp"
+                >
+                  <WhatsAppLogo className="h-4 w-4" />
+                  <span>WhatsApp</span>
+                </a>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              className="lg:pt-1"
+              initial={{ opacity: 0, x: 30, scale: 0.98 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="rounded-2xl border border-gold-400/35 bg-slate-950/90 p-4 shadow-[0_0_0_1px_rgba(245,158,11,0.08),0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <Car className="h-5 w-5 text-gold-300" aria-hidden="true" />
+                    <h2 className="text-xl font-semibold leading-tight text-radiant-gold">Book Your Service Now</h2>
+                  </div>
+
+                  <div className="text-right">
+                    <div className="text-[11px] font-semibold text-slate-200/80">
+                      Estimated Cost = <span className="text-radiant-gold">{investmentLabel}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="mt-1 text-sm text-slate-200/80">
+                  Submit a request and we’ll confirm availability.
+                </p>
+
+                <form onSubmit={handleSubmit} className="mt-5 space-y-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-slate-200" htmlFor="service">
+                        Select Service
+                      </label>
+                      <div className="relative">
+                        <Wrench className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-300/80" aria-hidden="true" />
+                        <select
+                          id="service"
+                          value={form.service}
+                          onChange={(e) => setForm((p) => ({ ...p, service: e.target.value as ServiceOption }))}
+                          className="h-10 w-full appearance-none rounded-lg border border-gold-400/20 bg-transparent pl-9 pr-9 text-sm text-slate-100 outline-none ring-0 placeholder:text-slate-500 focus:border-gold-400/45"
+                        >
+                          <option className="bg-slate-950" value="Basic Wash">Basic Wash</option>
+                          <option className="bg-slate-950" value="Super Wash & Interior">Super Wash & Interior</option>
+                          <option className="bg-slate-950" value="Single-Stage Polish">Single-Stage Polish</option>
+                          <option className="bg-slate-950" value="Glass Polish">Glass Polish</option>
+                          <option className="bg-slate-950" value="Basic Ceramic (6-9 Months)">Basic Ceramic (6-9 Months)</option>
+                          <option className="bg-slate-950" value="Ceramic Care+ (18-24 Months)">Ceramic Care+ (18-24 Months)</option>
+                        </select>
+                        <ChevronDown
+                          className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-300/80"
+                          aria-hidden="true"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-slate-200" htmlFor="carType">
+                        Select Car Type
+                      </label>
+                      <div className="relative">
+                        <Car className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-300/80" aria-hidden="true" />
+                        <select
+                          id="carType"
+                          value={form.carType}
+                          onChange={(e) => setForm((p) => ({ ...p, carType: e.target.value as CarTypeOption }))}
+                          className="h-10 w-full appearance-none rounded-lg border border-gold-400/20 bg-transparent pl-9 pr-9 text-sm text-slate-100 outline-none focus:border-gold-400/45"
+                        >
+                          <option className="bg-slate-950" value="Sedan">Sedan</option>
+                          <option className="bg-slate-950" value="SUV">SUV</option>
+                          <option className="bg-slate-950" value="Microbus">Microbus</option>
+                        </select>
+                        <ChevronDown
+                          className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-300/80"
+                          aria-hidden="true"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-200" htmlFor="fullName">
+                      Full Name
+                    </label>
+                    <div className="relative">
+                      <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-300/80" aria-hidden="true" />
+                      <input
+                        id="fullName"
+                        value={form.fullName}
+                        onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
+                        className="h-10 w-full rounded-lg border border-gold-400/20 bg-transparent pl-9 pr-3 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-gold-400/45"
+                        placeholder="Your name"
+                        autoComplete="name"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-200" htmlFor="phone">
+                      Phone Number
+                    </label>
+                    <div className="relative">
+                      <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-300/80" aria-hidden="true" />
+                      <input
+                        id="phone"
+                        value={form.phone}
+                        onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                        className="h-10 w-full rounded-lg border border-gold-400/20 bg-transparent pl-9 pr-3 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-gold-400/45"
+                        placeholder="01XXXXXXXXX"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-200" htmlFor="address">
+                      Address
+                    </label>
+                    <div className="relative">
+                      <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-300/80" aria-hidden="true" />
+                      <input
+                        id="address"
+                        value={form.address}
+                        onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))}
+                        className="h-10 w-full rounded-lg border border-gold-400/20 bg-transparent pl-9 pr-3 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-gold-400/45"
+                        placeholder="Street, area, city"
+                        autoComplete="street-address"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-200" htmlFor="dateTime">
+                      Date &amp; Time
+                    </label>
+                    <div className="relative">
+                      <CalendarClock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-300/80" aria-hidden="true" />
+                      <input
+                        id="dateTime"
+                        type="datetime-local"
+                        min={minDateTime}
+                        value={form.dateTimeLocal}
+                        onChange={(e) => setForm((p) => ({ ...p, dateTimeLocal: e.target.value }))}
+                        className={classNames(
+                          'h-10 w-full rounded-lg border bg-transparent pl-9 pr-3 text-sm outline-none',
+                          'border-gold-400/20 text-slate-100 focus:border-gold-400/45',
+                        )}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {status.type !== 'idle' && (
+                    <div
+                      className={classNames(
+                        'rounded-lg border px-3 py-1.5 text-sm',
+                        status.type === 'success'
+                          ? 'border-emerald-400/30 bg-emerald-950/40 text-emerald-100'
+                          : 'border-rose-400/30 bg-rose-950/40 text-rose-100',
+                      )}
+                      role="status"
+                      aria-live="polite"
+                    >
+                      {status.message}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-polish-gold inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-black transition hover:bg-gold-300 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {isSubmitting ? 'Submitting…' : 'Submit Request'}
+                  </button>
+
+                  <p className="text-xs text-slate-200/70">
+                    By submitting, you agree we may contact you to confirm your booking.
+                  </p>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4-Step Process */}
+      <SectionTransition className="bg-transparent">
+        <div className="mx-auto w-full max-w-[1400px] px-4 py-12">
+          <FadeIn>
+            <div className="flex items-end justify-between gap-4">
+              <h2 className="text-xl font-semibold text-radiant-gold sm:text-2xl">Our Simple 4-Step Process</h2>
+              <div className="hidden text-sm text-slate-200/70 sm:block">Fast • Clean • Verified</div>
+            </div>
+          </FadeIn>
+
+          <ol className="relative mt-8 pt-10 space-y-6 md:grid md:grid-cols-4 md:gap-4 md:space-y-0">
+            <div className="pointer-events-none absolute left-6 right-6 top-10 hidden h-px bg-linear-to-r from-transparent via-gold-400/35 to-transparent md:block" />
+
+            {processSteps.map((step, index) => (
+              <motion.li 
+                key={step.key} 
+                className="relative"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ delay: index * 0.15, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <motion.div 
+                  className="relative rounded-2xl border border-gold-400/20 bg-slate-950/90 p-5"
+                  whileHover={{ y: -5, boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)' }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {/* Number outside the card */}
+                  <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gold-400 text-[12px] font-bold text-black shadow-[0_10px_30px_-15px_rgba(245,158,11,0.9)]">
+                      {index + 1}
+                    </span>
+                  </div>
+
+                  {/* Icon inside the card */}
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gold-400/25 bg-slate-950/50 text-gold-300">
+                      {step.icon}
+                    </span>
+                    <div className="text-base font-semibold text-radiant-gold">{step.title}</div>
+                  </div>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-200/80">{step.description}</p>
+                </motion.div>
+              </motion.li>
+            ))}
+          </ol>
+        </div>
+      </SectionTransition>
+
+      {/* Services & Pricing */}
+      <SectionTransition className="bg-transparent" delay={0.1}>
+        <div className="mx-auto w-full max-w-[1400px] px-4 py-12">
+          <FadeIn>
+            <div className="flex flex-col gap-2">
+              <h2 className="text-xl font-semibold text-radiant-gold sm:text-2xl">Our Services</h2>
+              <p className="max-w-2xl text-sm text-slate-200/80">
+                Choose a category, then pick the service that fits your goal.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            {serviceCategories.map((cat, index) => (
+              <AnimatedCard 
+                key={cat.key} 
+                variant="lift"
+                className="rounded-2xl border border-gold-400/20 bg-slate-950/90 p-5"
+                style={{ transitionDelay: `${index * 100}ms` }}
+              >
+                <div className="flex items-center gap-2">
+                  {cat.icon}
+                  <h3 className="font-semibold text-radiant-gold">{cat.title}</h3>
+                </div>
+
+                <p className="mt-2 text-sm text-slate-200/80">{cat.blurb}</p>
+
+                <div className="mt-4 space-y-3">
+                  {cat.services.map((svc) => (
+                    <div key={svc.title} className="rounded-xl border border-white/10 bg-transparent p-4">
+                      <div className="font-medium text-slate-100">{svc.title}</div>
+                      <div className="mt-1 text-xs text-slate-200/70">{svc.detail}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4">
+                  <div className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-200/70">
+                    Available For
+                  </div>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                    {vehicleTypes.map((v) => (
+                      <VehicleChip key={`${cat.key}-${v.kind}`} kind={v.kind} label={v.label} subLabel={v.subLabel} />
+                    ))}
+                  </div>
+                </div>
+              </AnimatedCard>
+            ))}
+          </div>
+
+          <ScrollReveal variant="fade" delay={0.2}>
+            <div className="mt-6 rounded-2xl border border-gold-400/15 bg-slate-950/70 p-5">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gold-400/25 bg-slate-950/50">
+                <Sparkles className="h-5 w-5 text-gold-300" aria-hidden="true" />
+              </div>
+              <div>
+                <div className="font-medium text-radiant-gold">Need help choosing a package?</div>
+                <p className="mt-1 text-sm text-slate-200/80">
+                  Tell us your car type and your goal (quick refresh vs. long-term protection). We’ll recommend the best
+                  option.
+                </p>
+              </div>
+            </div>
+            </div>
+          </ScrollReveal>
+        </div>
+      </SectionTransition>
+
+      {/* Flyer Sections */}
+      <section className="bg-transparent space-y-24 py-12 lg:py-20">
+        {/* Flyer 1 */}
+        <div className="mx-auto w-full max-w-[1400px] px-4">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <SlideIn direction="left" className="space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-300">
+                <Droplets className="h-3.5 w-3.5" />
+                <span>Wash Service</span>
+              </div>
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">Car Exterior Wash Services</h2>
+              <p className="text-lg font-medium text-slate-200">A perfect choice for quick and effective cleaning.</p>
+              <p className="text-base text-slate-300/90 leading-relaxed">
+                We use high-pressure water, gentle foam, and eco-friendly shampoo to remove dirt and grime while protecting your car&apos;s paint.
+              </p>
+              
+              <div className="space-y-4 pt-2">
+                <h3 className="font-semibold text-radiant-gold">Car Exterior Wash Services Includes:</h3>
+                <ul className="grid gap-3 sm:grid-cols-1">
+                  {[
+                    "Complete exterior body wash",
+                    "Tire and rim cleaning",
+                    "Glass and mirror cleaning",
+                    "Streak-free drying"
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-sm text-slate-200">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gold-400/20">
+                        <Check className="h-3 w-3 text-gold-400" />
+                      </div>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="pt-4">
+                 <motion.button 
+                   onClick={() => document.getElementById('fullName')?.focus()}
+                   className="bg-polish-gold inline-flex h-12 items-center justify-center gap-2 rounded-full px-8 text-base font-bold text-black transition hover:brightness-110 shadow-[0_0_20px_rgba(250,204,21,0.3)] hover:shadow-[0_0_30px_rgba(250,204,21,0.5)]"
+                   whileHover={{ scale: 1.05, y: -2 }}
+                   whileTap={{ scale: 0.98 }}
+                 >
+                   Book Now
+                 </motion.button>
+              </div>
+            </SlideIn>
+            
+            {/* Visual Side */}
+            <ScrollReveal variant="scale" className="relative aspect-4/3 w-full overflow-hidden rounded-3xl border border-white/10 bg-slate-800 lg:order-last">
+               <Image
+                 src={`/wash.png?v=${serviceImageVersion}`}
+                 alt="Car exterior wash service"
+                 fill
+                 sizes="(min-width: 1024px) 50vw, 100vw"
+                 className="object-cover object-center"
+               />
+               <div className="absolute inset-0 bg-linear-to-br from-blue-950/35 via-slate-950/20 to-slate-950/70" />
+               {/* Flyer Overlay Look */}
+               <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-slate-950/90 to-transparent p-8">
+                  <motion.div 
+                    className="inline-block rounded-xl bg-blue-600 px-4 py-2 font-bold text-white shadow-lg"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, duration: 0.5 }}
+                  >
+                    Exterior Wash
+                  </motion.div>
+               </div>
+            </ScrollReveal>
+          </div>
+        </div>
+
+        {/* Flyer 2 */}
+        <div className="mx-auto w-full max-w-[1400px] px-4">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+             {/* Visual Side (Left on Desktop) */}
+            <ScrollReveal
+              variant="scale"
+              className="order-last relative aspect-4/3 w-full overflow-hidden rounded-3xl border border-white/10 bg-slate-800 lg:order-first"
+            >
+               <Image
+                 src={`/Interior.png?v=${serviceImageVersion}`}
+                 alt="Interior deep cleaning and exterior wash service"
+                 fill
+                 sizes="(min-width: 1024px) 50vw, 100vw"
+                 className="object-cover object-center"
+               />
+               <div className="absolute inset-0 bg-linear-to-br from-emerald-950/30 via-slate-950/15 to-slate-950/70" />
+               <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-slate-950/90 to-transparent p-8">
+                  <motion.div 
+                    className="inline-block rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white shadow-lg"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, duration: 0.5 }}
+                  >
+                    Deep Clean
+                  </motion.div>
+               </div>
+            </ScrollReveal>
+
+            <SlideIn direction="right" className="order-first space-y-6 lg:order-last">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Interior & Exterior</span>
+              </div>
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">Interior Deep Cleaning + Exterior Wash</h2>
+              <p className="text-lg font-medium text-slate-200">Ideal for a full car refresh. Clean both inside and outside of your car.</p>
+              <p className="text-base text-slate-300/90 leading-relaxed">
+                Our trained team carefully cleans your car&apos;s interior and exterior with specialized tools and safe detergents.
+              </p>
+              
+              <div className="space-y-4 pt-2">
+                <h3 className="font-semibold text-radiant-gold">Deep Cleaning + Exterior Wash Services Includes:</h3>
+                <ul className="grid gap-3 sm:grid-cols-1">
+                  {[
+                    "Exterior foam wash",
+                    "Dashboard and console cleaning",
+                    "Carpet and seat vacuum",
+                    "Door and handle polish",
+                    "Glass and mirror shine",
+                  ].map((item, i) => (
+                    <motion.li 
+                      key={i} 
+                      className="flex items-center gap-3 text-sm text-slate-200"
+                      initial={{ opacity: 0, x: 20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.1, duration: 0.4 }}
+                    >
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gold-400/20">
+                        <Check className="h-3 w-3 text-gold-400" />
+                      </div>
+                      {item}
+                    </motion.li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="pt-4">
+                 <motion.button 
+                   onClick={() => document.getElementById('fullName')?.focus()}
+                   className="bg-polish-gold inline-flex h-12 items-center justify-center gap-2 rounded-full px-8 text-base font-bold text-black transition hover:brightness-110 shadow-[0_0_20px_rgba(250,204,21,0.3)] hover:shadow-[0_0_30px_rgba(250,204,21,0.5)]"
+                   whileHover={{ scale: 1.05, y: -2 }}
+                   whileTap={{ scale: 0.98 }}
+                 >
+                   Book Now
+                 </motion.button>
+              </div>
+            </SlideIn>
+          </div>
+        </div>
+
+        {/* Flyer 3 */}
+        <div className="mx-auto w-full max-w-[1400px] px-4">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <SlideIn direction="left" className="space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-300">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                <span>Premium Protection</span>
+              </div>
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">Premium Polish & Ceramic Protection</h2>
+              <p className="text-lg font-medium text-slate-200">Restore showroom shine and lock it in with long-lasting protection.</p>
+              <p className="text-base text-slate-300/90 leading-relaxed">
+                Eliminate swirls and scratches while adding a hydrophobic ceramic layer that repels water and dirt for months.
+              </p>
+              
+              <div className="space-y-4 pt-2">
+                <h3 className="font-semibold text-radiant-gold">Premium Polish & Ceramic Services Includes:</h3>
+                <ul className="grid gap-3 sm:grid-cols-1">
+                  {[
+                    "Detailed exterior wash",
+                    "Multi-stage machine polish using professional-grade compounds",
+                    "Ceramic coating application",
+                    "Haze & swirl removal",
+                    "Hydrophobic water repellency",
+                    "Long-lasting gloss finish"
+
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-sm text-slate-200">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gold-400/20">
+                        <Check className="h-3 w-3 text-gold-400" />
+                      </div>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="pt-4">
+                 <motion.button 
+                   onClick={() => document.getElementById('fullName')?.focus()}
+                   className="bg-polish-gold inline-flex h-12 items-center justify-center gap-2 rounded-full px-8 text-base font-bold text-black transition hover:brightness-110 shadow-[0_0_20px_rgba(250,204,21,0.3)] hover:shadow-[0_0_30px_rgba(250,204,21,0.5)]"
+                   whileHover={{ scale: 1.05, y: -2 }}
+                   whileTap={{ scale: 0.98 }}
+                 >
+                   Book Now
+                 </motion.button>
+              </div>
+            </SlideIn>
+            
+            {/* Visual Side */}
+            <ScrollReveal variant="scale" className="relative aspect-4/3 w-full overflow-hidden rounded-3xl border border-white/10 bg-slate-800 lg:order-last">
+               <Image
+                 src={`/ceramic.png?v=${serviceImageVersion}`}
+                 alt="Ceramic coating and polish service"
+                 fill
+                 sizes="(min-width: 1024px) 50vw, 100vw"
+                 className="object-cover object-center"
+               />
+               <div className="absolute inset-0 bg-linear-to-br from-purple-950/30 via-slate-950/15 to-slate-950/70" />
+               <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-slate-950/90 to-transparent p-8">
+                  <motion.div 
+                    className="inline-block rounded-xl bg-purple-600 px-4 py-2 font-bold text-white shadow-lg"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, duration: 0.5 }}
+                  >
+                    Ceramic & Polish
+                  </motion.div>
+               </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Crystal Valley Section */}
+      <SectionTransition className="bg-transparent">
+        <div className="mx-auto w-full max-w-[1400px] px-4 py-12 lg:py-16">
+          <FadeIn className="mb-10 text-center">
+            <h2 className="text-2xl font-semibold text-radiant-gold sm:text-3xl">Why Choose Crystal Valley?</h2>
+            <p className="mt-3 text-sm text-slate-200/80">Premium service, ultimate convenience, and guaranteed satisfaction.</p>
+          </FadeIn>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                icon: <Car className="h-6 w-6 text-gold-400" />,
+                title: "Convenience",
+                desc: "No driving to car washes—we come to your home or office."
+              },
+              {
+                icon: <Briefcase className="h-6 w-6 text-gold-400" />,
+                title: "Expert Cleaners",
+                desc: "Trained professionals with gentle, thorough techniques."
+              },
+              {
+                icon: <Leaf className="h-6 w-6 text-gold-400" />,
+                title: "Eco-Friendly",
+                desc: "Safe chemicals that protect your paints and interior."
+              },
+              {
+                icon: <Clock className="h-6 w-6 text-gold-400" />,
+                title: "Prompt Service",
+                desc: "We arrive within 30-60 minutes of your booking, depending on availability."
+              }
+            ].map((item, i) => (
+              <motion.div 
+                key={i} 
+                className="group relative rounded-2xl border border-gold-400/20 bg-slate-950/80 p-6 transition-colors hover:bg-slate-900/80"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ delay: i * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ y: -5, boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)' }}
+              >
+                <motion.div 
+                  className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-gold-400/30 bg-gold-400/10"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {item.icon}
+                </motion.div>
+                <h3 className="mb-2 text-lg font-semibold text-slate-100 group-hover:text-gold-300">{item.title}</h3>
+                <p className="text-sm leading-relaxed text-slate-300/80">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </SectionTransition>
+
+      {/* Floating Action Buttons */}
+      <motion.div 
+        className="pointer-events-none fixed bottom-5 right-5 z-50 flex flex-col gap-3"
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1, duration: 0.5 }}
+      >
+        <motion.a
+          className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-[#25D366] text-black shadow-lg shadow-black/30 transition hover:brightness-110"
+          href={`https://wa.me/${WHATSAPP_NUMBER}`}
+          target="_blank"
+          rel="noreferrer"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          aria-label="WhatsApp"
+          title="WhatsApp"
+        >
+          <WhatsAppLogo className="h-6 w-6" />
+        </motion.a>
+        <motion.a
+          className="bg-polish-gold pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-full border border-gold-400/30 text-black shadow-lg shadow-black/30 transition hover:brightness-110"
+          href={`tel:${PHONE_NUMBER_TEL}`}
+          aria-label={`Call ${PHONE_NUMBER_DISPLAY}`}
+          title="Call"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Phone className="h-6 w-6" aria-hidden="true" />
+        </motion.a>
+      </motion.div>
+    </main>
+    </PageWrapper>
+  );
+}
+
+function SedanIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none">
+      <path
+        d="M6.2 14.2h11.6c.7 0 1.3-.4 1.5-1.1l.6-2.1c.2-.7-.1-1.5-.8-1.8l-2.4-1.1c-.2-.1-.4-.1-.6-.1H9.9c-.2 0-.4 0-.6.1L6.9 9.2c-.5.2-.8.7-.8 1.2v2.3c0 .8.6 1.5 1.4 1.5Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7.2 14.2v1.6M16.8 14.2v1.6"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M8 17.8a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6ZM16 17.8a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function SuvIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none">
+      <path
+        d="M5.6 14.2h12.8c.8 0 1.5-.5 1.7-1.3l.5-2c.2-.7-.1-1.4-.8-1.7l-2.9-1.2c-.2-.1-.4-.1-.6-.1H9.4c-.2 0-.4 0-.6.1L6.4 9.2c-.5.2-.8.7-.8 1.2v2.3c0 .8.6 1.5 1.4 1.5Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 14.2V16M17 14.2V16"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M8.3 17.8a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6ZM15.7 17.8a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6Z"
+        fill="currentColor"
+      />
+      <path
+        d="M9.2 9h5.6"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function MicrobusIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none">
+      <path
+        d="M6 8.6c0-1 .8-1.8 1.8-1.8h8.4c1 0 1.8.8 1.8 1.8v5.6H6V8.6Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6 14.2h12c.7 0 1.2.5 1.2 1.2v.6c0 .6-.5 1.2-1.2 1.2h-.8"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M6 17.2h.8"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M8 17.8a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6ZM16 17.8a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6Z"
+        fill="currentColor"
+      />
+      <path
+        d="M8 9.2h3.4M12.6 9.2H16"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}

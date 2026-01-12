@@ -274,7 +274,6 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
       muted
       playsInline
       preload={shouldLoad ? (isAndroid ? "auto" : "metadata") : "none"}
-      poster="/background-poster.jpg"
       aria-hidden="true"
       controls={false}
       controlsList="nodownload nofullscreen noremoteplayback"

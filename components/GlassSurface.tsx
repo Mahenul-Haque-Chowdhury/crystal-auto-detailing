@@ -32,6 +32,7 @@ export type GlassSurfaceProps = HTMLAttributes<HTMLDivElement> & {
   yChannel?: Channel;
   mixBlendMode?: CSSProperties['mixBlendMode'];
   tint?: string;
+  forceCssFallback?: boolean;
 };
 
 const GlassSurface = ({
@@ -56,6 +57,7 @@ const GlassSurface = ({
   tint = "rgba(6, 8, 16, 0.6)",
   className = "",
   style = {},
+  forceCssFallback = false,
   ...rest
 }: GlassSurfaceProps) => {
   const uniqueId = useId().replace(/:/g, "-");
@@ -140,6 +142,7 @@ const GlassSurface = ({
   ]);
 
   useEffect(() => {
+    if (forceCssFallback) return; // Skip logic if fallback is forced
     if (typeof ResizeObserver === 'undefined' || !containerRef.current) return;
 
     const resizeObserver = new ResizeObserver(() => {
@@ -149,7 +152,7 @@ const GlassSurface = ({
     resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [forceCssFallback]);
 
   useEffect(() => {
     setTimeout(updateDisplacementMap, 0);
@@ -172,9 +175,13 @@ const GlassSurface = ({
   };
 
   useEffect(() => {
+    if (forceCssFallback) {
+      setCanUseSvgFilters(false);
+      return;
+    }
     setCanUseSvgFilters(supportsSVGFilters());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [forceCssFallback]);
 
   const containerStyle: CSSProperties = {
     width: typeof width === 'number' ? `${width}px` : width,
