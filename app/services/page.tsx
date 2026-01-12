@@ -58,9 +58,9 @@ type FormState = {
   dateTimeLocal: string;
 };
 
-const WHATSAPP_NUMBER = '8801XXXXXXXXX';
-const PHONE_NUMBER_DISPLAY = '+8801XXXXXXXXX';
-const PHONE_NUMBER_TEL = '+8801XXXXXXXXX';
+const WHATSAPP_NUMBER = '8801841353850';
+const PHONE_NUMBER_DISPLAY = '+8801841353850';
+const PHONE_NUMBER_TEL = '+8801841353850';
 
 function classNames(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
@@ -1022,36 +1022,6 @@ export default function ServicesPage() {
         </div>
       </SectionTransition>
 
-      {/* Floating Action Buttons */}
-      <motion.div 
-        className="pointer-events-none fixed bottom-5 right-5 z-50 flex flex-col gap-3"
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.5 }}
-      >
-        <motion.a
-          className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-[#25D366] text-black shadow-lg shadow-black/30 transition hover:brightness-110"
-          href={`https://wa.me/${WHATSAPP_NUMBER}`}
-          target="_blank"
-          rel="noreferrer"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          aria-label="WhatsApp"
-          title="WhatsApp"
-        >
-          <WhatsAppLogo className="h-6 w-6" />
-        </motion.a>
-        <motion.a
-          className="bg-polish-gold pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-full border border-gold-400/30 text-black shadow-lg shadow-black/30 transition hover:brightness-110"
-          href={`tel:${PHONE_NUMBER_TEL}`}
-          aria-label={`Call ${PHONE_NUMBER_DISPLAY}`}
-          title="Call"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Phone className="h-6 w-6" aria-hidden="true" />
-        </motion.a>
-      </motion.div>
     </main>
     </PageWrapper>
   );

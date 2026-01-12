@@ -3,6 +3,7 @@ import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
 import AdaptiveBackgroundVideo from "@/components/AdaptiveBackgroundVideo";
+import BackgroundVideoGate from "@/components/BackgroundVideoGate";
 import SiteChrome from "@/components/SiteChrome";
 import { MotionProvider } from "@/components/animations";
 
@@ -47,6 +48,7 @@ export default function RootLayout({
             </div>
 
             <SiteChrome>{children}</SiteChrome>
+            <BackgroundVideoGate />
           </div>
         </MotionProvider>
       </body>

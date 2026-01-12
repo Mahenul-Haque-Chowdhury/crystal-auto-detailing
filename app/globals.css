@@ -478,6 +478,16 @@ input[type="reset"]:disabled,
   75% { transform: translateX(-2px) rotate(-0.25deg); }
 }
 
+@keyframes carEngineBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1.5px); }
+}
+
+.car-engine-bounce {
+  animation: carEngineBounce 0.55s ease-in-out infinite;
+  will-change: transform;
+}
+
 /* Glow & Pulse Animations */
 @keyframes pulseGlow {
   0% { box-shadow: 0 0 0 rgba(94, 234, 212, 0.35); }

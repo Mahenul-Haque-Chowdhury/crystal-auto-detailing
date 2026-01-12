@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import GlassSurface from "./GlassSurface";
 
 const LOGO_SRC = "/ghora1.png?v=2026-01-12-update";
-const CALL_NOW_TEL = "tel:+8801XXXXXXXXX";
+const CALL_NOW_TEL = "tel:+8801841353850";
 
 const navItems = [
   { href: "/about", label: "About" },

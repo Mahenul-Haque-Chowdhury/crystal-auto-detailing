@@ -95,9 +95,9 @@ export default function SiteFooter() {
                         <Mail className="h-4 w-4 text-gold-400 group-hover:text-gold-300" />
                         <span>contact@crystalvalley.autos</span>
                     </a>
-                    <a href="tel:+8801XXXXXXXXX" className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors group">
+                    <a href="tel:+8801841353850" className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors group">
                         <Phone className="h-4 w-4 text-gold-400 group-hover:text-gold-300" />
-                        <span>+880 1XXX-XXXXXX</span>
+                      <span>+8801841353850</span>
                     </a>
                 </div>
               </nav>

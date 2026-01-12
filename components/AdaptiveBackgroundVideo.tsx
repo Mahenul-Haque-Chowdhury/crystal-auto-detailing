@@ -10,6 +10,10 @@ type NetworkInformationLike = {
 };
 
 const PLAYHEAD_STORAGE_KEY = "cvad:bgVideoPlayheadSeconds:v1";
+const VIDEO_WARM_KEY = "cvad:bgVideoWarm:v1";
+const VIDEO_READY_EVENT = "cvad:bgVideoReady";
+const VIDEO_DISABLED_EVENT = "cvad:bgVideoDisabled";
+const VIDEO_ERROR_EVENT = "cvad:bgVideoError";
 
 const readStoredPlayheadSeconds = (): number | null => {
   if (typeof window === "undefined") return null;
@@ -59,7 +63,15 @@ type AdaptiveBackgroundVideoProps = {
 
 export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBackgroundVideoProps) {
   const [tier, setTier] = useState<VideoTier>(() => getVideoTier());
-  const [shouldLoad, setShouldLoad] = useState(false);
+  const [shouldLoad, setShouldLoad] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const warmed = window.sessionStorage.getItem(VIDEO_WARM_KEY) === "1";
+      return !warmed;
+    } catch {
+      return true;
+    }
+  });
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
@@ -86,6 +98,14 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
       window.clearTimeout(timeoutId);
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (tier === "off") {
+      window.dispatchEvent(new CustomEvent(VIDEO_DISABLED_EVENT));
+    }
+  }, [tier]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -237,6 +257,18 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
 
     const markVisible = () => {
       video.dataset.ready = "true";
+
+      try {
+        window.sessionStorage.setItem(VIDEO_WARM_KEY, "1");
+      } catch {
+        // ignore
+      }
+
+      window.dispatchEvent(new CustomEvent(VIDEO_READY_EVENT));
+    };
+
+    const handleError = () => {
+      window.dispatchEvent(new CustomEvent(VIDEO_ERROR_EVENT));
     };
 
     video.addEventListener("timeupdate", persistPlayhead);
@@ -244,6 +276,7 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
     video.addEventListener("loadedmetadata", restoreAndPlay);
     video.addEventListener("canplay", markVisible, { once: true });
     video.addEventListener("playing", markVisible, { once: true });
+    video.addEventListener("error", handleError);
     window.addEventListener("pagehide", persistPlayhead);
 
     if (video.readyState >= 1) {
@@ -256,6 +289,7 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
       video.removeEventListener("loadedmetadata", restoreAndPlay);
       video.removeEventListener("canplay", markVisible);
       video.removeEventListener("playing", markVisible);
+      video.removeEventListener("error", handleError);
       window.removeEventListener("pagehide", persistPlayhead);
     };
   }, [shouldLoad, src]);

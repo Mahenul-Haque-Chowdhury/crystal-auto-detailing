@@ -4,7 +4,7 @@ import Link from "next/link";
 import GlassSurface from "@/components/GlassSurface";
 import { FadeIn, SlideIn, StaggerChildren, StaggerItem, PageWrapper } from "@/components/animations";
 
-const CALL_NOW_TEL = "tel:+8801XXXXXXXXX";
+const CALL_NOW_TEL = "tel:+8801841353850";
 
 export default function AboutPage() {
   return (

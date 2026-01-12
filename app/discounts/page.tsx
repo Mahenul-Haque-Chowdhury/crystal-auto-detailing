@@ -135,9 +135,9 @@ const HeroSection = memo(function HeroSection({
 }) {
   return (
     <section className="relative h-dvh min-h-svh">
-      <div className="relative z-10 flex h-dvh min-h-svh flex-col items-center justify-start gap-4 px-6 pt-[calc(env(safe-area-inset-top,20px)+72px)] pb-[calc(env(safe-area-inset-bottom,10px)+120px)] text-center md:gap-6 md:px-12 md:pt-28 md:pb-12">
+      <div className="relative z-10 flex h-dvh min-h-svh flex-col items-center justify-start gap-4 px-6 pt-[calc(env(safe-area-inset-top,20px)+72px)] pb-[calc(env(safe-area-inset-bottom,10px)+28px)] text-center md:gap-6 md:px-12 md:pt-28 md:pb-12">
         <motion.h1
-          className={`${migraClassName} mt-6 space-y-2 text-2xl font-[510] leading-tight sm:mt-8 sm:space-y-3 sm:text-3xl md:mt-2 md:text-6xl`}
+          className={`${migraClassName} mt-6 space-y-2 text-3xl font-[510] leading-tight sm:mt-8 sm:space-y-3 sm:text-4xl md:mt-2 md:text-6xl`}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -167,6 +167,71 @@ const HeroSection = memo(function HeroSection({
             Reimagine Your Ride
           </motion.span>
         </motion.h1>
+
+        {/* Mobile: CTAs directly under the slogan */}
+        <motion.div
+          className="mt-2 flex w-full max-w-[320px] flex-col items-center gap-3 sm:max-w-sm md:hidden"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <AnimatePresence>
+            {!isDiscountOpen && (
+              <motion.div
+                className="w-full"
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 18 }}
+                transition={{ duration: 0.35 }}
+              >
+                <GlassButton
+                  type="button"
+                  className="glow-ring w-full px-5 py-2.5 text-sm tracking-[0.25em] text-white sm:px-6 sm:py-3 sm:text-base sm:tracking-[0.35em]"
+                  surfaceClassName="w-full"
+                  surfaceProps={{ tint: "rgba(255, 255, 255, 0.16)", backgroundOpacity: 0.18, blur: 18 }}
+                  onClick={onExplore}
+                >
+                  Explore Discount
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 5v14m0 0 6-6m-6 6-6-6"
+                      stroke="#000"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </GlassButton>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {!isDiscountOpen ? (
+            <GlassSurface
+              width="100%"
+              height="auto"
+              borderRadius={999}
+              backgroundOpacity={0.12}
+              saturation={1.15}
+              tint="rgba(2, 6, 23, 0.5)"
+              className="w-full border border-white/10"
+              style={{ padding: 0 }}
+            >
+              <Link
+                href="/"
+                className="block w-full rounded-full px-5 py-2.5 text-center text-xs font-semibold tracking-[0.22em] text-white/85 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300/60"
+              >
+                Back to Home
+              </Link>
+            </GlassSurface>
+          ) : null}
+        </motion.div>
 
         {/* Desktop: Explore Discount button */}
         <motion.div
@@ -203,64 +268,6 @@ const HeroSection = memo(function HeroSection({
           </GlassSurface>
         </motion.div>
 
-        {/* Mobile: Explore Discount button fixed at bottom */}
-        <div className="absolute inset-x-0 bottom-[calc(env(safe-area-inset-bottom,10px)+40px)] z-20 flex flex-col items-center gap-2.5 px-5 sm:bottom-14 sm:gap-3 sm:px-6 md:hidden">
-          <AnimatePresence>
-            {!isDiscountOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 30 }}
-                transition={{ duration: 0.4 }}
-              >
-                <GlassButton
-                  type="button"
-                  className="glow-ring w-full max-w-[320px] px-5 py-2.5 text-sm tracking-[0.25em] text-white sm:max-w-sm sm:px-6 sm:py-3 sm:text-base sm:tracking-[0.35em]"
-                  surfaceClassName="w-full max-w-[320px] sm:max-w-sm"
-                  surfaceProps={{ tint: "rgba(255, 255, 255, 0.16)", backgroundOpacity: 0.18, blur: 18 }}
-                  onClick={onExplore}
-                >
-                  Explore Discount
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 5v14m0 0 6-6m-6 6-6-6"
-                      stroke="#000"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </GlassButton>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {!isDiscountOpen ? (
-            <GlassSurface
-              width="100%"
-              height="auto"
-              borderRadius={999}
-              backgroundOpacity={0.12}
-              saturation={1.15}
-              tint="rgba(2, 6, 23, 0.5)"
-              className="w-full max-w-[320px] border border-white/10 sm:max-w-sm"
-              style={{ padding: 0 }}
-            >
-              <Link
-                href="/"
-                className="block w-full rounded-full px-5 py-2.5 text-center text-xs font-semibold tracking-[0.22em] text-white/85 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300/60"
-              >
-                Back to Home
-              </Link>
-            </GlassSurface>
-          ) : null}
-        </div>
       </div>
     </section>
   );

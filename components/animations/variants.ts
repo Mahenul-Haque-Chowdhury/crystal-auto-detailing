@@ -113,15 +113,13 @@ export const scaleUpVariants: Variants = {
 export const pageVariants: Variants = {
   hidden: { 
     opacity: 0,
-    y: 20,
-    filter: 'blur(10px)'
+    y: 16
   },
   visible: { 
     opacity: 1, 
     y: 0,
-    filter: 'blur(0px)',
     transition: { 
-      duration: 0.5, 
+      duration: 0.45, 
       ease: easings.easeOut,
       staggerChildren: 0.1
     }
@@ -129,9 +127,8 @@ export const pageVariants: Variants = {
   exit: { 
     opacity: 0,
     y: -10,
-    filter: 'blur(5px)',
     transition: { 
-      duration: 0.3, 
+      duration: 0.25, 
       ease: easings.easeIn 
     }
   }
@@ -160,11 +157,10 @@ export const staggerItemVariants: Variants = {
 
 // Hero text variants
 export const heroTextVariants: Variants = {
-  hidden: { opacity: 0, y: 30, filter: 'blur(10px)' },
+  hidden: { opacity: 0, y: 24 },
   visible: { 
     opacity: 1, 
     y: 0,
-    filter: 'blur(0px)',
     transition: { duration: 0.8, ease: easings.easeOut }
   }
 };

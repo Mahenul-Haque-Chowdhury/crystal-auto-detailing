@@ -45,13 +45,12 @@ interface PageWrapperProps extends Omit<HTMLMotionProps<'div'>, 'children'> {
 export function PageWrapper({ children, className = '', ...props }: PageWrapperProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ 
         opacity: 1, 
         y: 0, 
-        filter: 'blur(0px)',
         transition: { 
-          duration: 0.5, 
+          duration: 0.45, 
           ease: easings.easeOut,
           staggerChildren: 0.1
         }
@@ -59,9 +58,9 @@ export function PageWrapper({ children, className = '', ...props }: PageWrapperP
       exit={{ 
         opacity: 0, 
         y: -10, 
-        filter: 'blur(4px)',
-        transition: { duration: 0.3 }
+        transition: { duration: 0.25, ease: easings.easeIn }
       }}
+      style={{ willChange: 'transform, opacity' }}
       className={className}
       {...props}
     >
