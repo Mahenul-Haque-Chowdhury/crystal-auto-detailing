@@ -25,6 +25,7 @@ type RequestBody = {
   phone?: unknown;
   address?: unknown;
   dateTimeLocal?: unknown;
+  remarks?: unknown;
   sourcePage?: unknown;
 };
 
@@ -84,6 +85,7 @@ export async function POST(request: Request) {
   const addressRaw = typeof body.address === "string" ? body.address : "";
   const dateTimeLocalRaw =
     typeof body.dateTimeLocal === "string" ? body.dateTimeLocal : "";
+  const remarksRaw = typeof body.remarks === "string" ? body.remarks : "";
   const sourcePageRaw =
     typeof body.sourcePage === "string" ? body.sourcePage : "";
 
@@ -92,6 +94,7 @@ export async function POST(request: Request) {
   const full_name = normalizeText(fullNameRaw);
   const phone = normalizePhone(phoneRaw);
   const address = normalizeText(addressRaw);
+  const remarks = normalizeText(remarksRaw).slice(0, 1000) || null;
   const requested_datetime_iso = normalizeText(dateTimeLocalRaw)
     ? toIsoFromLocalDateTime(dateTimeLocalRaw)
     : null;
@@ -130,6 +133,7 @@ export async function POST(request: Request) {
     phone,
     address,
     requested_datetime: requested_datetime_iso,
+    remarks,
     source_page,
     user_agent,
     ip,
@@ -160,6 +164,7 @@ export async function POST(request: Request) {
   formBody.set("phone", phone);
   formBody.set("address", address);
   formBody.set("requested_datetime", requested_datetime_iso);
+  if (remarks) formBody.set("remarks", remarks);
   if (source_page) formBody.set("source_page", source_page);
   formBody.set("_subject", `New booking request: ${service} (${car_type})`);
 

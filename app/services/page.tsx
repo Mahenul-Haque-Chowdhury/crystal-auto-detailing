@@ -55,6 +55,7 @@ type FormState = {
   phone: string;
   address: string;
   dateTimeLocal: string;
+  remarks: string;
 };
 
 const WHATSAPP_NUMBER = '8801841353850';
@@ -180,6 +181,7 @@ export default function ServicesPage() {
     phone: '',
     address: '',
     dateTimeLocal: '',
+    remarks: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -287,6 +289,7 @@ export default function ServicesPage() {
           phone: form.phone,
           address: form.address,
           dateTimeLocal: form.dateTimeLocal,
+          remarks: form.remarks,
           sourcePage: typeof window !== 'undefined' ? window.location.pathname : undefined,
         }),
       });
@@ -314,6 +317,7 @@ export default function ServicesPage() {
         phone: '',
         address: '',
         dateTimeLocal: '',
+        remarks: '',
       }));
     } catch {
       setStatus({
@@ -674,6 +678,22 @@ export default function ServicesPage() {
                           'border-gold-400/20 text-slate-100 focus:border-gold-400/45',
                         )}
                         required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-200" htmlFor="remarks">
+                      Remarks
+                    </label>
+                    <div className="relative">
+                      <textarea
+                        id="remarks"
+                        value={form.remarks}
+                        onChange={(e) => setForm((p) => ({ ...p, remarks: e.target.value }))}
+                        className="min-h-[96px] w-full resize-none rounded-lg border border-gold-400/20 bg-transparent px-3 py-2 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-gold-400/45"
+                        placeholder="Any notes (preferred time, exact location, special requests, etc.)"
+                        maxLength={1000}
                       />
                     </div>
                   </div>

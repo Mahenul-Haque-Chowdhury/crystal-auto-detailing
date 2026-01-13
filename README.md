@@ -34,6 +34,13 @@ Notes:
 - Discounts are generated and stored server-side via `POST /api/discounts`, so the service role key is required.
 - With this setup you do NOT need to allow public `SELECT` to check for duplicates.
 
+### Booking Form
+
+Booking submissions are handled server-side via `POST /api/booking`:
+
+- Sends an email notification through Formspree
+- Saves the request into Supabase (including optional `remarks`)
+
 ### Prerequisites
 
 - Node.js 18.18+ or 20.5+
