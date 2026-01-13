@@ -53,6 +53,12 @@ export default function AboutPage() {
               </h2>
             </FadeIn>
 
+            <SlideIn direction="up" delay={0.06}>
+              <p className="mt-2 text-sm font-medium text-slate-200/80 sm:text-base">
+                Hear from the man behind Crystal Valley
+              </p>
+            </SlideIn>
+
             <SlideIn direction="up" delay={0.08}>
               <div className="mt-6">
                 <GlassSurface
