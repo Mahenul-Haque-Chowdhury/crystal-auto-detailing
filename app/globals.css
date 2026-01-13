@@ -109,7 +109,8 @@ input[type="reset"]:disabled,
 /* Android-specific viewport fix */
 @supports (-webkit-touch-callout: none) or (height: 100dvh) {
   html, body {
-    height: 100dvh;
+    min-height: 100dvh;
+    height: auto;
   }
 }
 

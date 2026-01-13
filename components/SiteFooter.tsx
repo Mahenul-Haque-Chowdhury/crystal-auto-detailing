@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Facebook, Instagram, Linkedin, Mail, Phone, ChevronUp } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Mail, Phone } from "lucide-react";
 import { motion } from "framer-motion";
 
 import GlassSurface from "./GlassSurface";
@@ -14,7 +14,7 @@ export default function SiteFooter() {
 
   return (
     <motion.footer 
-      className="relative mt-auto w-full"
+      className="relative mt-auto w-full safe-area-bottom"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true, margin: '-100px' }}
@@ -130,15 +130,6 @@ export default function SiteFooter() {
                      GrayVally Software Solutions
                    </a>
                  </span>
-                 
-                 <motion.button 
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="flex items-center gap-2 text-white/60 hover:text-white transition-colors uppercase font-bold tracking-widest"
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                 >
-                   Top <ChevronUp className="h-4 w-4 text-gold-400" />
-                 </motion.button>
             </div>
           </div>
         </div>
