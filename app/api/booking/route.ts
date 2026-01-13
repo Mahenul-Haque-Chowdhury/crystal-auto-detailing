@@ -57,18 +57,19 @@ const safeJson = async (response: Response): Promise<unknown> => {
 };
 
 export async function POST(request: Request) {
-  let supabaseAdmin: ReturnType<typeof getSupabaseAdmin>;
-  let bookingsTableName: string;
+  let supabaseAdmin: ReturnType<typeof getSupabaseAdmin> | null = null;
+  let bookingsTableName: string | null = null;
+  let supabaseMisconfiguredMessage: string | null = null;
 
   try {
     supabaseAdmin = getSupabaseAdmin();
     bookingsTableName = getBookingsTableName();
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Server misconfigured";
-    return NextResponse.json(
-      { status: "misconfigured", message },
-      { status: 500 }
-    );
+    // Allow the form to keep working even if Supabase isn't configured yet.
+    // We'll still submit to Formspree so the business receives the request.
+    supabaseAdmin = null;
+    bookingsTableName = null;
+    supabaseMisconfiguredMessage = error instanceof Error ? error.message : "Server misconfigured";
   }
 
   let body: RequestBody;
@@ -139,22 +140,28 @@ export async function POST(request: Request) {
     ip,
   };
 
-  const { data: bookingRow, error: bookingError } = await supabaseAdmin
-    .from(bookingsTableName)
-    .upsert(insertPayload, {
-      onConflict: "phone,requested_datetime,service,car_type",
-    })
-    .select("id")
-    .single();
+  let bookingId: string | number | null = null;
 
-  if (bookingError || !bookingRow?.id) {
-    return NextResponse.json(
-      {
-        status: "error",
-        message: bookingError?.message ?? "Failed to save booking request.",
-      },
-      { status: 500 }
-    );
+  if (supabaseAdmin && bookingsTableName) {
+    const { data: bookingRow, error: bookingError } = await supabaseAdmin
+      .from(bookingsTableName)
+      .upsert(insertPayload, {
+        onConflict: "phone,requested_datetime,service,car_type",
+      })
+      .select("id")
+      .single();
+
+    if (bookingError || !bookingRow?.id) {
+      return NextResponse.json(
+        {
+          status: "error",
+          message: bookingError?.message ?? "Failed to save booking request.",
+        },
+        { status: 500 }
+      );
+    }
+
+    bookingId = bookingRow.id;
   }
 
   const formBody = new URLSearchParams();
@@ -184,42 +191,58 @@ export async function POST(request: Request) {
     formspreeStatus = formspreeRes.status;
     formspreeResponse = await safeJson(formspreeRes);
 
-    await supabaseAdmin
-      .from(bookingsTableName)
-      .update({
-        formspree_status: formspreeStatus,
-        formspree_response: formspreeResponse,
-      })
-      .eq("id", bookingRow.id);
+    if (supabaseAdmin && bookingsTableName && bookingId != null) {
+      await supabaseAdmin
+        .from(bookingsTableName)
+        .update({
+          formspree_status: formspreeStatus,
+          formspree_response: formspreeResponse,
+        })
+        .eq("id", bookingId);
+    }
 
     if (!formspreeRes.ok) {
       return NextResponse.json(
         {
           status: "formspree_error",
-          message: "Booking saved, but email notification failed. Please try again.",
-          bookingId: bookingRow.id,
+          message:
+            bookingId != null
+              ? "Booking saved, but email notification failed. Please try again."
+              : "Email notification failed. Please try again.",
+          bookingId,
+          supabase: bookingId == null && supabaseMisconfiguredMessage ? supabaseMisconfiguredMessage : undefined,
         },
         { status: 502 }
       );
     }
   } catch {
-    await supabaseAdmin
-      .from(bookingsTableName)
-      .update({
-        formspree_status: formspreeStatus,
-        formspree_response: formspreeResponse,
-      })
-      .eq("id", bookingRow.id);
+    if (supabaseAdmin && bookingsTableName && bookingId != null) {
+      await supabaseAdmin
+        .from(bookingsTableName)
+        .update({
+          formspree_status: formspreeStatus,
+          formspree_response: formspreeResponse,
+        })
+        .eq("id", bookingId);
+    }
 
     return NextResponse.json(
       {
         status: "formspree_error",
-        message: "Booking saved, but email notification failed. Please try again.",
-        bookingId: bookingRow.id,
+        message:
+          bookingId != null
+            ? "Booking saved, but email notification failed. Please try again."
+            : "Email notification failed. Please try again.",
+        bookingId,
+        supabase: bookingId == null && supabaseMisconfiguredMessage ? supabaseMisconfiguredMessage : undefined,
       },
       { status: 502 }
     );
   }
 
-  return NextResponse.json({ status: "ok", bookingId: bookingRow.id });
+  return NextResponse.json({
+    status: "ok",
+    bookingId,
+    supabase: bookingId == null && supabaseMisconfiguredMessage ? supabaseMisconfiguredMessage : undefined,
+  });
 }
