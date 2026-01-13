@@ -495,7 +495,7 @@ export default function Home() {
             Designed &amp; Built by{" "}
             <a
               href="https://grayvally.tech"
-              target="_blank"
+              target="_blank" 
               rel="noreferrer"
               className="pointer-events-auto font-semibold text-white/85 underline decoration-white/35 underline-offset-4 transition hover:text-white"
             >

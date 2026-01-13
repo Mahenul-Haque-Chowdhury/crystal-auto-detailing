@@ -102,11 +102,13 @@ const GlassSurface = ({
   };
 
   const updateDisplacementMap = () => {
+    if (!canUseSvgFilters) return;
     if (!feImageRef.current) return;
     feImageRef.current.setAttribute('href', generateDisplacementMap());
   };
 
   useEffect(() => {
+    if (!canUseSvgFilters) return;
     updateDisplacementMap();
 
     [
@@ -139,10 +141,12 @@ const GlassSurface = ({
     xChannel,
     yChannel,
     mixBlendMode,
+    canUseSvgFilters,
   ]);
 
   useEffect(() => {
     if (forceCssFallback) return; // Skip logic if fallback is forced
+    if (!canUseSvgFilters) return;
     if (typeof ResizeObserver === 'undefined' || !containerRef.current) return;
 
     const resizeObserver = new ResizeObserver(() => {
@@ -152,12 +156,19 @@ const GlassSurface = ({
     resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forceCssFallback]);
+  }, [forceCssFallback, canUseSvgFilters]);
 
   useEffect(() => {
+    if (!canUseSvgFilters) return;
     setTimeout(updateDisplacementMap, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [width, height]);
+  }, [width, height, canUseSvgFilters]);
+
+  useEffect(() => {
+    if (!canUseSvgFilters) return;
+    setTimeout(updateDisplacementMap, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canUseSvgFilters]);
 
   const supportsSVGFilters = () => {
     if (typeof window === 'undefined') return false;

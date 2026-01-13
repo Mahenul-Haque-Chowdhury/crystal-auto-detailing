@@ -6,7 +6,6 @@ import Image from 'next/image';
 import GlassSurface from '@/components/GlassSurface';
 import { PageWrapper, SectionTransition } from '@/components/animations/PageTransition';
 import { ScrollReveal } from '@/components/animations/ScrollReveal';
-import { AnimatedCard } from '@/components/animations/AnimatedCard';
 import { SlideIn } from '@/components/animations/SlideIn';
 import { FadeIn } from '@/components/animations/FadeIn';
 import {
@@ -70,32 +69,6 @@ function formatBDT(amount: number) {
   return `${amount.toLocaleString('en-US')} BDT`;
 }
 
-type VehicleKind = 'sedan' | 'suv' | 'microbus';
-
-function VehicleChip({
-  kind,
-  label,
-  subLabel,
-}: {
-  kind: VehicleKind;
-  label: string;
-  subLabel?: string;
-}) {
-  const Icon = kind === 'sedan' ? SedanIcon : kind === 'suv' ? SuvIcon : MicrobusIcon;
-
-  return (
-    <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2">
-      <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gold-400/20 bg-slate-950/60 text-gold-300">
-        <Icon className="h-5 w-5" />
-      </span>
-      <div className="leading-tight">
-        <div className="text-sm font-semibold text-slate-100">{label}</div>
-        {subLabel ? <div className="text-[11px] text-slate-200/70">{subLabel}</div> : null}
-      </div>
-    </div>
-  );
-}
-
 type EstimatedPrice = { kind: 'exact'; amount: number } | { kind: 'from'; amount: number };
 
 function getEstimatedPrice(service: ServiceOption, carType: CarTypeOption): EstimatedPrice | null {
@@ -135,6 +108,64 @@ function getEstimatedPrice(service: ServiceOption, carType: CarTypeOption): Esti
 export default function ServicesPage() {
   // Bump this string if you replace images in /public but the browser keeps showing the old cached version.
   const serviceImageVersion = '2026-01-13-1';
+  const packageImageVersion = '2026-01-13-2';
+
+  type PackageTabKey = 'sedan' | 'suv' | 'noah';
+
+  const packageTabs = useMemo(
+    () =>
+      [
+        {
+          key: 'sedan' as const,
+          label: 'Sedan',
+          imageSrc: `/sadan.png?v=${packageImageVersion}`,
+          heading: 'Sedan Car Service Details',
+          items: [
+            'Car Models: Toyota Allion, Premio, Axio, Corolla, Honda Grace, City, Nissan Sunny, Mitsubishi Lancer, and more',
+            { label: 'Basic Wash:', price: '৳ 700 BDT' },
+            { label: 'Super Wash & Interior:', price: '৳ 1,200 BDT' },
+            { label: 'Single stage polish:', price: '৳ 4,500 BDT' },
+            { label: 'Basic Ceramic:', price: '৳ 8,000 BDT' },
+            { label: 'Ceramic Care+:', price: '৳ 10,000 BDT' },
+          ],
+        },
+        {
+          key: 'suv' as const,
+          label: 'SUV / MUV',
+          imageSrc: `/suv.png?v=${packageImageVersion}`,
+          heading: 'SUV/MUV Car Service Details',
+          items: [
+            'Car Models: Toyota Harrier, RAV4, Prado, Nissan X-Trail, Honda CR-V, and more',
+            { label: 'Basic Wash:', price: '৳ 900 BDT' },
+            { label: 'Super Wash & Interior:', price: '৳ 1,500 BDT' },
+            { label: 'Single stage polish:', price: '৳ 5,500 BDT' },
+            { label: 'Basic Ceramic:', price: '৳ 10,000 BDT' },
+            { label: 'Ceramic Care+:', price: '৳ 12,500 BDT' },
+          ],
+        },
+        {
+          key: 'noah' as const,
+          label: 'Noah / Hiace',
+          imageSrc: `/noah.png?v=${packageImageVersion}`,
+          heading: 'Noah/Hiace Car Service Details',
+          items: [
+            'Car Models: Toyota Noah, Voxy, Hiace, Microbus, and more',
+            { label: 'Basic Wash:', price: '৳ 900 BDT' },
+            { label: 'Super Wash & Interior:', price: '৳ 1,500 BDT' },
+            { label: 'Single stage polish:', price: '৳ 6,500 BDT' },
+            { label: 'Basic Ceramic:', price: '৳ 10,000 BDT' },
+            { label: 'Ceramic Care+:', price: '৳ 13,000 BDT' },
+          ],
+        },
+      ] as const,
+    []
+  );
+
+  const [activePackageTab, setActivePackageTab] = useState<PackageTabKey>('sedan');
+  const activeTab = useMemo(
+    () => packageTabs.find((tab) => tab.key === activePackageTab) ?? packageTabs[0],
+    [activePackageTab, packageTabs]
+  );
 
   const heroTitleFull = 'We Bring Premium Car Detailing at Your Doorstep.';
   const [heroTitleTyped, setHeroTitleTyped] = useState('');
@@ -272,45 +303,6 @@ export default function ServicesPage() {
     }
   }
 
-  const vehicleTypes = [
-    { kind: 'sedan', label: 'Sedan' },
-    { kind: 'suv', label: 'SUV' },
-    { kind: 'microbus', label: 'Microbus', subLabel: 'Noah • Hiace' },
-  ] satisfies ReadonlyArray<{ kind: VehicleKind; label: string; subLabel?: string }>;
-
-  const serviceCategories = [
-    {
-      key: 'wash',
-      icon: <Sparkles className="h-5 w-5 text-gold-300" aria-hidden="true" />,
-      title: 'Wash Packages',
-      blurb: 'Quick refresh to deep clean—safe products, spotless finish.',
-      services: [
-        { title: 'Basic Wash', detail: 'Exterior wash, rinse, tire & rim cleaning.' },
-        { title: 'Super Wash & Interior', detail: 'Exterior + interior wipe-down & vacuum.' },
-      ],
-    },
-    {
-      key: 'polish',
-      icon: <Car className="h-5 w-5 text-gold-300" aria-hidden="true" />,
-      title: 'Polish & Glass Care',
-      blurb: 'Restore clarity and shine—reduce haze, swirls, and water spots.',
-      services: [
-        { title: 'Single-Stage Polish', detail: 'Gloss enhancement & swirl reduction.' },
-        { title: 'Glass Polish', detail: 'Windshield, side & rear glass clarity treatment.' },
-      ],
-    },
-    {
-      key: 'ceramic',
-      icon: <ShieldCheck className="h-5 w-5 text-gold-300" aria-hidden="true" />,
-      title: 'Ceramic Protection',
-      blurb: 'Hydrophobic protection with long-lasting gloss & easier wash.',
-      services: [
-        { title: 'Basic Ceramic (6–9 Months)', detail: 'Entry ceramic layer for daily drivers.' },
-        { title: 'Ceramic Care+ (18–24 Months)', detail: 'Extended durability, premium finish.' },
-      ],
-    },
-  ] as const;
-
   const processSteps = [
     {
       key: 'confirmation',
@@ -404,7 +396,6 @@ export default function ServicesPage() {
                 {[
                   'Complete exterior body wash',
                   'Tire and rim cleaning',
-                  'Underbody wash',
                   'Glass and mirror cleaning',
                 ].map((item, index) => (
                   <motion.li 
@@ -695,68 +686,100 @@ export default function ServicesPage() {
       <SectionTransition className="bg-transparent" delay={0.1}>
         <div className="mx-auto w-full max-w-[1400px] px-4 py-12">
           <FadeIn>
-            <div className="flex flex-col gap-2">
-              <h2 className="text-xl font-semibold text-radiant-gold sm:text-2xl">Our Services</h2>
-              <p className="max-w-2xl text-sm text-slate-200/80">
-                Choose a category, then pick the service that fits your goal.
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-white sm:text-3xl">Available Service Packages and Pricing</h2>
+              <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-200/80 sm:text-base">
+                Keep your car clean, shiny, and well-maintained with Crystal Valley.
               </p>
             </div>
           </FadeIn>
 
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
-            {serviceCategories.map((cat, index) => (
-              <AnimatedCard 
-                key={cat.key} 
-                variant="lift"
-                className="rounded-2xl border border-gold-400/20 bg-slate-950/90 p-5"
-                style={{ transitionDelay: `${index * 100}ms` }}
-              >
-                <div className="flex items-center gap-2">
-                  {cat.icon}
-                  <h3 className="font-semibold text-radiant-gold">{cat.title}</h3>
-                </div>
-
-                <p className="mt-2 text-sm text-slate-200/80">{cat.blurb}</p>
-
-                <div className="mt-4 space-y-3">
-                  {cat.services.map((svc) => (
-                    <div key={svc.title} className="rounded-xl border border-white/10 bg-transparent p-4">
-                      <div className="font-medium text-slate-100">{svc.title}</div>
-                      <div className="mt-1 text-xs text-slate-200/70">{svc.detail}</div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-4">
-                  <div className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-200/70">
-                    Available For
-                  </div>
-                  <div className="mt-2 grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-                    {vehicleTypes.map((v) => (
-                      <VehicleChip key={`${cat.key}-${v.kind}`} kind={v.kind} label={v.label} subLabel={v.subLabel} />
-                    ))}
-                  </div>
-                </div>
-              </AnimatedCard>
-            ))}
+          <div className="mt-8 flex flex-nowrap items-center justify-center gap-3 overflow-x-auto pb-2 sm:overflow-visible sm:pb-0">
+            {packageTabs.map((tab) => {
+              const isActive = tab.key === activePackageTab;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActivePackageTab(tab.key)}
+                  className={`shrink-0 whitespace-nowrap px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-300 sm:px-5 ${
+                    isActive
+                      ? 'border border-gold-400/40 bg-slate-950 text-radiant-gold'
+                      : 'border border-white/10 bg-slate-950/60 text-white hover:border-gold-400/30 hover:bg-slate-950/80'
+                  }`}
+                  style={{ borderRadius: 8 }}
+                  aria-pressed={isActive}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
 
-          <ScrollReveal variant="fade" delay={0.2}>
-            <div className="mt-6 rounded-2xl border border-gold-400/15 bg-slate-950/70 p-5">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gold-400/25 bg-slate-950/50">
-                <Sparkles className="h-5 w-5 text-gold-300" aria-hidden="true" />
-              </div>
-              <div>
-                <div className="font-medium text-radiant-gold">Need help choosing a package?</div>
-                <p className="mt-1 text-sm text-slate-200/80">
-                  Tell us your car type and your goal (quick refresh vs. long-term protection). We’ll recommend the best
-                  option.
-                </p>
+          <div className="mt-6 grid items-start gap-6 sm:mt-8 sm:gap-8 lg:grid-cols-2">
+            <div className="relative">
+              <div className="relative aspect-video w-full sm:aspect-4/3">
+                {packageTabs.map((tab) => {
+                  const isActive = tab.key === activePackageTab;
+                  return (
+                    <motion.div
+                      key={tab.key}
+                      initial={false}
+                      animate={isActive ? { opacity: 1, x: 0, scale: 1 } : { opacity: 0, x: 0, scale: 1 }}
+                      transition={isActive ? { duration: 0.5, ease: [0.22, 1, 0.36, 1] } : { duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+                      className="pointer-events-none absolute inset-0 sm:-translate-x-11"
+                      style={{ zIndex: isActive ? 1 : 0 }}
+                      aria-hidden={!isActive}
+                    >
+                      <Image
+                        src={tab.imageSrc}
+                        alt={`${tab.label} package image`}
+                        fill
+                        sizes="(min-width: 1024px) 50vw, 100vw"
+                        className="translate-y-2 scale-[1.45] object-contain object-center drop-shadow-[0_24px_70px_rgba(0,0,0,0.55)] sm:-translate-y-20 sm:scale-[1.24] sm:object-bottom-left lg:-translate-y-28 lg:scale-[1.34]"
+                        draggable={false}
+                        priority
+                      />
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
+
+            <div className="mx-auto w-full max-w-[680px] rounded-2xl border border-white/10 bg-slate-950/40 p-6 sm:p-8 lg:mx-0 lg:max-w-none">
+              <h3 className="text-xl font-bold text-radiant-gold sm:text-2xl">{activeTab.heading}</h3>
+
+              <ul className="mt-4 space-y-3 text-sm text-slate-100/90 sm:mt-5 sm:text-base">
+                {activeTab.items.map((item) => {
+                  if (typeof item === 'string') {
+                    return (
+                      <li key={item} className="leading-relaxed">
+                        {item}
+                      </li>
+                    );
+                  }
+
+                  return (
+                    <li key={item.label} className="leading-relaxed">
+                      <span>{item.label} </span>
+                      <span className="font-semibold text-radiant-gold">{item.price}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <div className="mt-6">
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('fullName')?.focus()}
+                  className="inline-flex items-center justify-center bg-polish-gold px-6 py-3 text-sm font-semibold text-black transition hover:brightness-110"
+                  style={{ borderRadius: 8 }}
+                >
+                  Book Now
+                </button>
+              </div>
             </div>
-          </ScrollReveal>
+          </div>
         </div>
       </SectionTransition>
 
@@ -1042,92 +1065,5 @@ export default function ServicesPage() {
 
     </main>
     </PageWrapper>
-  );
-}
-
-function SedanIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none">
-      <path
-        d="M6.2 14.2h11.6c.7 0 1.3-.4 1.5-1.1l.6-2.1c.2-.7-.1-1.5-.8-1.8l-2.4-1.1c-.2-.1-.4-.1-.6-.1H9.9c-.2 0-.4 0-.6.1L6.9 9.2c-.5.2-.8.7-.8 1.2v2.3c0 .8.6 1.5 1.4 1.5Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M7.2 14.2v1.6M16.8 14.2v1.6"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <path
-        d="M8 17.8a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6ZM16 17.8a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-function SuvIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none">
-      <path
-        d="M5.6 14.2h12.8c.8 0 1.5-.5 1.7-1.3l.5-2c.2-.7-.1-1.4-.8-1.7l-2.9-1.2c-.2-.1-.4-.1-.6-.1H9.4c-.2 0-.4 0-.6.1L6.4 9.2c-.5.2-.8.7-.8 1.2v2.3c0 .8.6 1.5 1.4 1.5Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M7 14.2V16M17 14.2V16"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <path
-        d="M8.3 17.8a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6ZM15.7 17.8a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6Z"
-        fill="currentColor"
-      />
-      <path
-        d="M9.2 9h5.6"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function MicrobusIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none">
-      <path
-        d="M6 8.6c0-1 .8-1.8 1.8-1.8h8.4c1 0 1.8.8 1.8 1.8v5.6H6V8.6Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M6 14.2h12c.7 0 1.2.5 1.2 1.2v.6c0 .6-.5 1.2-1.2 1.2h-.8"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <path
-        d="M6 17.2h.8"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <path
-        d="M8 17.8a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6ZM16 17.8a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6Z"
-        fill="currentColor"
-      />
-      <path
-        d="M8 9.2h3.4M12.6 9.2H16"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
   );
 }

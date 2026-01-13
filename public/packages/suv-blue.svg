@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200" role="img" aria-label="SUV placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071021"/>
+      <stop offset="1" stop-color="#020617"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="60%" cy="25%" r="70%">
+      <stop offset="0" stop-color="#38bdf8" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1600" height="1200" fill="url(#bg)"/>
+  <rect width="1600" height="1200" fill="url(#glow)"/>
+
+  <path d="M180 860H1420" stroke="#d4af37" stroke-opacity="0.25" stroke-width="4"/>
+
+  <!-- SUV-ish blocky silhouette -->
+  <g transform="translate(140,520)">
+    <path
+      d="M230 250c24-66 76-120 155-150 98-38 252-46 475-46s377 8 475 46c79 30 131 84 155 150l35 96c6 17-3 35-20 41l-76 26c-12 4-25-1-32-12l-55-83c-18-27-48-43-80-43H333c-32 0-62 16-80 43l-55 83c-7 11-20 16-32 12l-76-26c-17-6-26-24-20-41l35-96z"
+      fill="#cbd5e1" fill-opacity="0.92"/>
+
+    <rect x="430" y="70" width="740" height="170" rx="26" fill="#cbd5e1" fill-opacity="0.88"/>
+    <rect x="510" y="108" width="580" height="96" rx="18" fill="#0b1224" fill-opacity="0.76"/>
+
+    <circle cx="450" cy="332" r="84" fill="#0b1224"/>
+    <circle cx="450" cy="332" r="50" fill="#111827"/>
+    <circle cx="1190" cy="332" r="84" fill="#0b1224"/>
+    <circle cx="1190" cy="332" r="50" fill="#111827"/>
+
+    <path d="M320 252h1060" stroke="#38bdf8" stroke-opacity="0.45" stroke-width="6"/>
+  </g>
+
+  <text x="800" y="176" text-anchor="middle" fill="#e5e7eb" font-family="ui-sans-serif, system-ui" font-size="34" font-weight="700" letter-spacing="1">
+    SUV/MUV (Placeholder)
+  </text>
+</svg>
