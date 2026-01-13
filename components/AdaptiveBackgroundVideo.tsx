@@ -62,22 +62,26 @@ type AdaptiveBackgroundVideoProps = {
 };
 
 export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBackgroundVideoProps) {
-  const [tier, setTier] = useState<VideoTier>(() => getVideoTier());
-  const [shouldLoad, setShouldLoad] = useState(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      const warmed = window.sessionStorage.getItem(VIDEO_WARM_KEY) === "1";
-      return !warmed;
-    } catch {
-      return true;
-    }
-  });
+  // Important: keep the initial render identical on server + client to avoid hydration mismatches.
+  const [tier, setTier] = useState<VideoTier>("p1080");
+  const [shouldLoad, setShouldLoad] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
-    const tierTimeoutId = window.setTimeout(() => {
-      setTier(getVideoTier());
-    }, 0);
+    const tierTimeoutId = window.setTimeout(() => setTier(getVideoTier()), 0);
+
+    let warmed = false;
+    try {
+      warmed = window.sessionStorage.getItem(VIDEO_WARM_KEY) === "1";
+    } catch {
+      // ignore
+    }
+
+    // Warmed sessions can start loading immediately.
+    if (warmed) {
+      setShouldLoad(true);
+      return () => window.clearTimeout(tierTimeoutId);
+    }
 
     const idleCallback = (window as Window & {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;

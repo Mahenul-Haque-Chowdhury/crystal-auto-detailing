@@ -21,6 +21,12 @@ SUPABASE_SERVICE_ROLE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY
 
 # Optional (defaults to "discounts")
 # SUPABASE_DISCOUNTS_TABLE=discounts
+
+# Optional (defaults to "booking_appointments")
+# SUPABASE_BOOKINGS_TABLE=booking_appointments
+
+# Optional (defaults to https://formspree.io/f/mkoonadg)
+# FORMSPREE_BOOKING_ENDPOINT=https://formspree.io/f/mkoonadg
 ```
 
 Notes:

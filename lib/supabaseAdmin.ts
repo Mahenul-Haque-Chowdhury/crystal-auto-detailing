@@ -20,3 +20,6 @@ export const getSupabaseAdmin = (): SupabaseClient => {
 
 export const getDiscountsTableName = () =>
   process.env.SUPABASE_DISCOUNTS_TABLE ?? "discounts";
+
+export const getBookingsTableName = () =>
+  process.env.SUPABASE_BOOKINGS_TABLE ?? "booking_appointments";

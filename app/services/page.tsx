@@ -189,6 +189,17 @@ export default function ServicesPage() {
     | { type: 'error'; message: string }
   >({ type: 'idle' });
 
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isSuccessModalOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsSuccessModalOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isSuccessModalOpen]);
+
   const minDateTime = useMemo(() => {
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
@@ -266,26 +277,37 @@ export default function ServicesPage() {
 
     setIsSubmitting(true);
     try {
-      // TODO: Supabase Integration
-      // - Insert booking request into your Supabase table here.
-      // - Example shape:
-      //   const payload = {
-      //     service: form.service,
-      //     car_type: form.carType,
-      //     full_name: form.fullName,
-      //     phone: form.phone,
-      //     address: form.address,
-      //     requested_datetime: form.dateTimeLocal,
-      //     created_at: new Date().toISOString(),
-      //   };
-      // - Then call your Supabase client to `insert(payload)`.
+      const response = await fetch('/api/booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service: form.service,
+          carType: form.carType,
+          fullName: form.fullName,
+          phone: form.phone,
+          address: form.address,
+          dateTimeLocal: form.dateTimeLocal,
+          sourcePage: typeof window !== 'undefined' ? window.location.pathname : undefined,
+        }),
+      });
 
-      await new Promise((r) => setTimeout(r, 450));
+      const data = (await response.json().catch(() => null)) as
+        | { status?: string; message?: string }
+        | null;
+
+      if (!response.ok) {
+        setStatus({
+          type: 'error',
+          message: data?.message || 'Something went wrong. Please try again in a moment.',
+        });
+        return;
+      }
 
       setStatus({
         type: 'success',
         message: 'Request submitted. We’ll contact you shortly to confirm the booking.',
       });
+      setIsSuccessModalOpen(true);
       setForm((prev) => ({
         ...prev,
         fullName: '',
@@ -333,6 +355,62 @@ export default function ServicesPage() {
   return (
     <PageWrapper>
       <main className="bg-transparent font-sans text-slate-100">
+        {isSuccessModalOpen && status.type === 'success' && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center px-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Booking request submitted"
+          >
+            <button
+              type="button"
+              className="absolute inset-0 bg-black/60"
+              onClick={() => {
+                setIsSuccessModalOpen(false);
+                setStatus({ type: 'idle' });
+              }}
+              aria-label="Close"
+            />
+
+            <div
+              className="relative w-full max-w-md rounded-2xl border border-gold-400/30 bg-slate-950/95 p-5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.85)]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-lg font-semibold text-radiant-gold">Success</div>
+                  <p className="mt-1 text-sm text-slate-200/85">{status.message}</p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSuccessModalOpen(false);
+                    setStatus({ type: 'idle' });
+                  }}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-100 transition hover:bg-white/10"
+                  aria-label="Close popup"
+                >
+                  <span aria-hidden="true">×</span>
+                </button>
+              </div>
+
+              <div className="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSuccessModalOpen(false);
+                    setStatus({ type: 'idle' });
+                  }}
+                  className="inline-flex h-10 items-center justify-center rounded-lg bg-polish-gold px-4 text-sm font-semibold text-black transition hover:bg-gold-300"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Hero + Booking */}
         <section className="bg-transparent">
           <div className="mx-auto w-full max-w-[1400px] px-4 py-12 sm:py-16">
@@ -600,13 +678,11 @@ export default function ServicesPage() {
                     </div>
                   </div>
 
-                  {status.type !== 'idle' && (
+                  {status.type === 'error' && (
                     <div
                       className={classNames(
                         'rounded-lg border px-3 py-1.5 text-sm',
-                        status.type === 'success'
-                          ? 'border-emerald-400/30 bg-emerald-950/40 text-emerald-100'
-                          : 'border-rose-400/30 bg-rose-950/40 text-rose-100',
+                        'border-rose-400/30 bg-rose-950/40 text-rose-100',
                       )}
                       role="status"
                       aria-live="polite"
@@ -637,9 +713,9 @@ export default function ServicesPage() {
       <SectionTransition className="bg-transparent">
         <div className="mx-auto w-full max-w-[1400px] px-4 py-12">
           <FadeIn>
-            <div className="flex items-end justify-between gap-4">
-              <h2 className="text-xl font-semibold text-radiant-gold sm:text-2xl">Our Simple 4-Step Process</h2>
-              <div className="hidden text-sm text-slate-200/70 sm:block">Fast • Clean • Verified</div>
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-white sm:text-3xl">Our Simple 4-Step Process</h2>
+              <div className="mt-2 text-sm text-slate-200/70">Fast • Clean • Verified</div>
             </div>
           </FadeIn>
 
@@ -747,7 +823,7 @@ export default function ServicesPage() {
             </div>
 
             <div className="mx-auto w-full max-w-[680px] rounded-2xl border border-white/10 bg-slate-950/40 p-6 sm:p-8 lg:mx-0 lg:max-w-none">
-              <h3 className="text-xl font-bold text-radiant-gold sm:text-2xl">{activeTab.heading}</h3>
+              <h3 className="text-xl font-bold text-white sm:text-2xl">{activeTab.heading}</h3>
 
               <ul className="mt-4 space-y-3 text-sm text-slate-100/90 sm:mt-5 sm:text-base">
                 {activeTab.items.map((item) => {
@@ -1012,7 +1088,7 @@ export default function ServicesPage() {
       <SectionTransition className="bg-transparent">
         <div className="mx-auto w-full max-w-[1400px] px-4 py-12 lg:py-16">
           <FadeIn className="mb-10 text-center">
-            <h2 className="text-2xl font-semibold text-radiant-gold sm:text-3xl">Why Choose Crystal Valley?</h2>
+            <h2 className="text-2xl font-semibold text-white sm:text-3xl">Why Choose Crystal Valley?</h2>
             <p className="mt-3 text-sm text-slate-200/80">Premium service, ultimate convenience, and guaranteed satisfaction.</p>
           </FadeIn>
 

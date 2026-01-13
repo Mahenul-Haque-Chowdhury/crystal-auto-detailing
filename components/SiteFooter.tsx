@@ -32,20 +32,20 @@ export default function SiteFooter() {
       >
         <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-10 px-4 py-12 lg:px-6">
           {/* Main Footer Content */}
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-6 lg:gap-8">
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] lg:gap-x-16 lg:gap-y-10">
             {/* Brand & Social Section */}
-            <div className="flex flex-col gap-6 lg:col-span-2">
+            <div className="flex flex-col gap-6">
               <Link
                 href="/"
-                className="flex items-center gap-1.5 font-semibold tracking-tight text-radiant-gold hover:text-radiant-gold transition-colors"
+                className="flex items-center justify-start gap-1 font-semibold tracking-tight text-radiant-gold hover:text-radiant-gold transition-colors"
                 aria-label="Crystal Valley Auto Detail"
               >
-                <span className="relative h-20 w-32 shrink-0">
+                <span className="relative h-24 w-32 shrink-0">
                   <Image
                     src={LOGO_SRC}
                     alt="Crystal Valley Auto Detail"
                     fill
-                    className="object-contain scale-110 origin-left"
+                    className="object-contain object-left"
                   />
                 </span>
                 <span className="text-2xl font-bold leading-none">
@@ -84,7 +84,7 @@ export default function SiteFooter() {
             </div>
 
             {/* Support Section */}
-            <div className="flex flex-col gap-5 lg:col-span-2">
+            <div className="flex flex-col gap-5 lg:col-span-1">
               <h3 className="text-base font-bold uppercase tracking-wider text-gold-400">Support</h3>
               <nav className="flex flex-col gap-3">
                 <FooterLink href="/help">Help Center</FooterLink>
