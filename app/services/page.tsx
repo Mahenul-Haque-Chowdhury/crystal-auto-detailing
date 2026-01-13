@@ -549,7 +549,7 @@ export default function ServicesPage() {
                     <h2 className="text-xl font-semibold leading-tight text-radiant-gold whitespace-nowrap">Book Your Service Now</h2>
                   </div>
                   <p className="text-sm text-slate-200/80">
-                    Submit a request and we'll confirm availability.
+                    Submit a request and we’ll confirm availability.
                   </p>
                 </div>
 
@@ -568,7 +568,7 @@ export default function ServicesPage() {
                 </div>
 
                 <p className="mt-1 hidden text-sm text-slate-200/80 sm:block">
-                  Submit a request and we'll confirm availability.
+                  Submit a request and we’ll confirm availability.
                 </p>
 
                 <form onSubmit={handleSubmit} className="mt-5 space-y-3">

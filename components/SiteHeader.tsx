@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 import GlassSurface from "./GlassSurface";
 
@@ -23,7 +23,74 @@ const isActiveHref = (pathname: string, href: string) => {
 
 export default function SiteHeader() {
   const pathname = usePathname();
+  const prefersReducedMotion = useReducedMotion();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const headerRef = useRef<HTMLElement | null>(null);
+  const lastScrollYRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
+  const [isHidden, setIsHidden] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (prefersReducedMotion) return;
+
+    // When the mobile menu is open, we stop scroll tracking.
+    if (isMenuOpen) return;
+
+    const delta = 6;
+    const hideAfterY = 80;
+
+    lastScrollYRef.current = window.scrollY || 0;
+
+    const onScroll = () => {
+      if (rafRef.current != null) return;
+      rafRef.current = window.requestAnimationFrame(() => {
+        rafRef.current = null;
+        const currentY = window.scrollY || 0;
+        const lastY = lastScrollYRef.current;
+
+        if (currentY <= 8) {
+          setIsHidden(false);
+          lastScrollYRef.current = currentY;
+          return;
+        }
+
+        const scrollingDown = currentY > lastY + delta;
+        const scrollingUp = currentY < lastY - delta;
+
+        if (scrollingDown && currentY > hideAfterY) setIsHidden(true);
+        if (scrollingUp) setIsHidden(false);
+
+        lastScrollYRef.current = currentY;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafRef.current != null) window.cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    };
+  }, [isMenuOpen, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const el = headerRef.current;
+    if (!el) return;
+
+    const setVar = () => {
+      const h = Math.ceil(el.getBoundingClientRect().height);
+      document.documentElement.style.setProperty("--site-header-h", `${h}px`);
+    };
+
+    setVar();
+
+    const ro = new ResizeObserver(() => setVar());
+    ro.observe(el);
+
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -58,11 +125,17 @@ export default function SiteHeader() {
   }, [isMenuOpen]);
 
   return (
-    <motion.header 
-      className="safe-area-top sticky top-0 z-50"
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    <motion.header
+      ref={headerRef}
+      className="safe-area-top fixed left-0 right-0 top-0 z-50"
+      initial={{ y: -120, opacity: 0 }}
+      animate={
+        prefersReducedMotion
+          ? { y: 0, opacity: 1 }
+          : { y: isMenuOpen ? 0 : isHidden ? "-110%" : 0, opacity: 1 }
+      }
+      transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+      style={{ willChange: "transform" }}
     >
       <div className="relative">
         <GlassSurface

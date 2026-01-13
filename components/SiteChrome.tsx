@@ -12,7 +12,10 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   return (
     <>
       <SiteHeader />
-      <div className="relative flex min-h-dvh flex-col">
+      <div
+        className="relative flex min-h-dvh flex-col"
+        style={{ paddingTop: "var(--site-header-h, 0px)" }}
+      >
         <main className="flex-1">{children}</main>
         {!hideFooter ? <SiteFooter /> : null}
       </div>

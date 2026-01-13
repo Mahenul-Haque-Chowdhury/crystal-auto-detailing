@@ -79,8 +79,11 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
 
     // Warmed sessions can start loading immediately.
     if (warmed) {
-      setShouldLoad(true);
-      return () => window.clearTimeout(tierTimeoutId);
+      const warmTimeoutId = window.setTimeout(() => setShouldLoad(true), 0);
+      return () => {
+        window.clearTimeout(tierTimeoutId);
+        window.clearTimeout(warmTimeoutId);
+      };
     }
 
     const idleCallback = (window as Window & {
