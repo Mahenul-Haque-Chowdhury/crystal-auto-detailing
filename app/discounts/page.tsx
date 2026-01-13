@@ -494,7 +494,7 @@ export default function Home() {
           <p className="text-[11px] font-medium tracking-wide text-white/70 md:text-xs">
             Designed &amp; Built by{" "}
             <a
-              href="https://grayvalley.tech"
+              href="https://grayvally.tech"
               target="_blank"
               rel="noreferrer"
               className="pointer-events-auto font-semibold text-white/85 underline decoration-white/35 underline-offset-4 transition hover:text-white"
