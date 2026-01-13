@@ -30,25 +30,25 @@ export default function SiteFooter() {
         className="border-t border-gold-400/15"
         forceCssFallback={true}
       >
-        <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-10 px-4 py-12 lg:px-6">
+        <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-6 px-4 py-10 md:gap-10 md:py-12 lg:px-6">
           {/* Main Footer Content */}
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] lg:gap-x-16 lg:gap-y-10">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] lg:gap-x-16 lg:gap-y-10">
             {/* Brand & Social Section */}
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col items-center gap-4 text-center md:items-start md:text-left md:gap-6">
               <Link
                 href="/"
-                className="flex items-center justify-start gap-1 font-semibold tracking-tight text-radiant-gold hover:text-radiant-gold transition-colors"
+                className="flex items-center justify-center gap-1 font-semibold tracking-tight text-radiant-gold hover:text-radiant-gold transition-colors md:justify-start"
                 aria-label="Crystal Valley Auto Detail"
               >
-                <span className="relative h-24 w-32 shrink-0">
+                <span className="relative h-20 w-28 shrink-0 md:h-24 md:w-32">
                   <Image
                     src={LOGO_SRC}
                     alt="Crystal Valley Auto Detail"
                     fill
-                    className="object-contain object-left"
+                    className="object-contain"
                   />
                 </span>
-                <span className="text-2xl font-bold leading-none">
+                <span className="text-xl font-bold leading-none md:text-2xl">
                   Crystal Valley
                 </span>
               </Link>
@@ -57,7 +57,7 @@ export default function SiteFooter() {
               </p>
               
               {/* Social Media Links */}
-              <div className="flex items-center gap-4 mt-2">
+              <div className="flex items-center justify-center gap-4 md:justify-start">
                 <SocialLink href="https://facebook.com" aria-label="Facebook">
                   <Facebook className="h-5 w-5" />
                 </SocialLink>
@@ -70,8 +70,55 @@ export default function SiteFooter() {
               </div>
             </div>
 
-            {/* Company Section */}
-            <div className="flex flex-col gap-5 lg:col-span-1">
+            {/* Mobile: Company & Legal side by side */}
+            <div className="grid grid-cols-2 gap-4 md:hidden">
+              {/* Company Section - Mobile */}
+              <div className="flex flex-col items-center gap-3 text-center">
+                <h3 className="text-base font-bold uppercase tracking-wider text-gold-400">Company</h3>
+                <nav className="flex flex-col items-center gap-2">
+                  <FooterLink href="/about">About Us</FooterLink>
+                  <FooterLink href="/team">Our Team</FooterLink>
+                  <FooterLink href="/blog">Blog</FooterLink>
+                  <FooterLink href="/discounts" className="font-semibold text-gold-400 hover:text-gold-300">
+                    Get Discount
+                  </FooterLink>
+                </nav>
+              </div>
+
+              {/* Legal Section - Mobile */}
+              <div className="flex flex-col items-center gap-3 text-center">
+                <h3 className="text-base font-bold uppercase tracking-wider text-gold-400">Legal</h3>
+                <nav className="flex flex-col items-center gap-2">
+                  <FooterLink href="/terms">Terms of Use</FooterLink>
+                  <FooterLink href="/privacy">Privacy Policy</FooterLink>
+                  <FooterLink href="/cookie-policy">Cookie Policy</FooterLink>
+                  <FooterLink href="/refund-policy">Refund Policy</FooterLink>
+                </nav>
+              </div>
+            </div>
+
+            {/* Mobile: Support Section - Centered */}
+            <div className="flex flex-col items-center gap-3 text-center md:hidden">
+              <h3 className="text-base font-bold uppercase tracking-wider text-gold-400">Support</h3>
+              <nav className="flex flex-col items-center gap-2">
+                <FooterLink href="/help">Help Center</FooterLink>
+                <FooterLink href="/faq">FAQs</FooterLink>
+                
+                <div className="mt-2 flex flex-col items-center gap-3">
+                  <a href="mailto:contact@crystalvalley.autos" className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors group">
+                    <Mail className="h-4 w-4 text-gold-400 group-hover:text-gold-300" />
+                    <span>contact@crystalvalley.autos</span>
+                  </a>
+                  <a href="tel:+8801841353850" className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors group">
+                    <Phone className="h-4 w-4 text-gold-400 group-hover:text-gold-300" />
+                    <span>+8801841353850</span>
+                  </a>
+                </div>
+              </nav>
+            </div>
+
+            {/* Desktop: Company Section */}
+            <div className="hidden md:flex flex-col gap-5 lg:col-span-1">
               <h3 className="text-base font-bold uppercase tracking-wider text-gold-400">Company</h3>
               <nav className="flex flex-col gap-3">
                 <FooterLink href="/about">About Us</FooterLink>
@@ -83,8 +130,8 @@ export default function SiteFooter() {
               </nav>
             </div>
 
-            {/* Support Section */}
-            <div className="flex flex-col gap-5 lg:col-span-1">
+            {/* Desktop: Support Section */}
+            <div className="hidden md:flex flex-col gap-5 lg:col-span-1">
               <h3 className="text-base font-bold uppercase tracking-wider text-gold-400">Support</h3>
               <nav className="flex flex-col gap-3">
                 <FooterLink href="/help">Help Center</FooterLink>
@@ -103,8 +150,8 @@ export default function SiteFooter() {
               </nav>
             </div>
 
-            {/* Legal Section */}
-            <div className="flex flex-col gap-5 lg:col-span-1">
+            {/* Desktop: Legal Section */}
+            <div className="hidden md:flex flex-col gap-5 lg:col-span-1">
               <h3 className="text-base font-bold uppercase tracking-wider text-gold-400">Legal</h3>
               <nav className="flex flex-col gap-3">
                 <FooterLink href="/terms">Terms of Use</FooterLink>

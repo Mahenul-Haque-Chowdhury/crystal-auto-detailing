@@ -168,7 +168,7 @@ export default function ServicesPage() {
     [activePackageTab, packageTabs]
   );
 
-  const heroTitleFull = 'We Bring Premium Car Detailing at Your Doorstep.';
+  const heroTitleFull = 'Premium Car Detailing at Your Doorstep';
   const [heroTitleTyped, setHeroTitleTyped] = useState('');
 
   const heroHighlightWord = 'Doorstep';
@@ -431,11 +431,10 @@ export default function ServicesPage() {
               >
                 <span className="sr-only">{heroTitleFull}</span>
                 <span aria-hidden="true">
-                  {/* Mobile: force 3 lines, keep Doorstep last */}
+                  {/* Mobile: concise 2-line headline */}
                   <span className="block md:hidden">
-                    <span className="block">We Bring Premium</span>
-                    <span className="block">Car Detailing at Your</span>
-                    <span className="block text-polish-gold">Doorstep.</span>
+                    <span className="block">Premium Car Detailing</span>
+                    <span className="block">at Your <span className="text-polish-gold">Doorstep</span></span>
                   </span>
 
                   {/* Desktop: typed headline with highlighted Doorstep */}
@@ -470,15 +469,21 @@ export default function ServicesPage() {
                 </span>
               </h1>
 
-              <p className="max-w-xl text-pretty text-sm leading-relaxed text-slate-200/90 sm:text-base">
-                We bring the showroom shine to you. Mobile service requiring only water &amp; electricity access.
-              </p>
+
+              <div className="max-w-xl">
+                <div className="inline-flex items-center gap-2 rounded-full border border-gold-400/25 bg-slate-950/55 px-4 py-2 text-sm font-semibold text-slate-100 shadow-[0_12px_40px_-25px_rgba(0,0,0,0.8)] sm:text-base">
+                  <MapPin className="h-4 w-4 text-gold-300" aria-hidden="true" />
+                  <span>
+                    <span className="text-polish-gold">Dhaka-based</span> <span className="text-slate-400">|</span> Professional-grade results, Wherever You Are.
+                  </span>
+                </div>
+              </div>
 
               <ul className="grid max-w-xl gap-3 text-sm text-slate-200/90 sm:text-base">
                 {[
-                  'Complete exterior body wash',
-                  'Tire and rim cleaning',
-                  'Glass and mirror cleaning',
+                  'Car Exterior Wash Services',
+                  'Interior Deep Cleaning + Exterior Wash',
+                  'Premium Polish & Ceramic Protection',
                 ].map((item, index) => (
                   <motion.li 
                     key={item} 
@@ -537,10 +542,22 @@ export default function ServicesPage() {
               transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             >
               <div className="rounded-2xl border border-gold-400/35 bg-slate-950/90 p-4 shadow-[0_0_0_1px_rgba(245,158,11,0.08),0_24px_60px_-30px_rgba(0,0,0,0.75)] sm:p-6">
-                <div className="flex items-start justify-between gap-4">
+                {/* Mobile: centered title */}
+                <div className="flex flex-col items-center gap-1 sm:hidden">
+                  <div className="flex items-center gap-2">
+                    <Car className="h-6 w-6 text-gold-300" aria-hidden="true" />
+                    <h2 className="text-xl font-semibold leading-tight text-radiant-gold whitespace-nowrap">Book Your Service Now</h2>
+                  </div>
+                  <p className="text-sm text-slate-200/80">
+                    Submit a request and we'll confirm availability.
+                  </p>
+                </div>
+
+                {/* Desktop: original layout with estimated cost */}
+                <div className="hidden sm:flex sm:items-start sm:justify-between sm:gap-4">
                   <div className="flex items-center gap-3">
-                    <Car className="h-5 w-5 text-gold-300" aria-hidden="true" />
-                    <h2 className="text-xl font-semibold leading-tight text-radiant-gold">Book Your Service Now</h2>
+                    <Car className="h-5 w-5 text-gold-300 lg:h-7 lg:w-7" aria-hidden="true" />
+                    <h2 className="text-xl font-semibold leading-tight text-radiant-gold lg:text-3xl">Book Your Service Now</h2>
                   </div>
 
                   <div className="text-right">
@@ -550,8 +567,8 @@ export default function ServicesPage() {
                   </div>
                 </div>
 
-                <p className="mt-1 text-sm text-slate-200/80">
-                  Submit a request and we’ll confirm availability.
+                <p className="mt-1 hidden text-sm text-slate-200/80 sm:block">
+                  Submit a request and we'll confirm availability.
                 </p>
 
                 <form onSubmit={handleSubmit} className="mt-5 space-y-3">
@@ -606,40 +623,49 @@ export default function ServicesPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-200" htmlFor="fullName">
-                      Full Name
-                    </label>
-                    <div className="relative">
-                      <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-300/80" aria-hidden="true" />
-                      <input
-                        id="fullName"
-                        value={form.fullName}
-                        onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
-                        className="h-10 w-full rounded-lg border border-gold-400/20 bg-transparent pl-9 pr-3 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-gold-400/45"
-                        placeholder="Your name"
-                        autoComplete="name"
-                        required
-                      />
+                  {/* Mobile: Estimated cost under car type */}
+                  <div className="text-center sm:hidden">
+                    <div className="text-xs font-semibold text-slate-200/80">
+                      Estimated Cost = <span className="text-radiant-gold">{investmentLabel}</span>
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-200" htmlFor="phone">
-                      Phone Number
-                    </label>
-                    <div className="relative">
-                      <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-300/80" aria-hidden="true" />
-                      <input
-                        id="phone"
-                        value={form.phone}
-                        onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-                        className="h-10 w-full rounded-lg border border-gold-400/20 bg-transparent pl-9 pr-3 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-gold-400/45"
-                        placeholder="01XXXXXXXXX"
-                        inputMode="tel"
-                        autoComplete="tel"
-                        required
-                      />
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-slate-200" htmlFor="fullName">
+                        Full Name
+                      </label>
+                      <div className="relative">
+                        <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-300/80" aria-hidden="true" />
+                        <input
+                          id="fullName"
+                          value={form.fullName}
+                          onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
+                          className="h-10 w-full rounded-lg border border-gold-400/20 bg-transparent pl-9 pr-3 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-gold-400/45"
+                          placeholder="Your name"
+                          autoComplete="name"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-slate-200" htmlFor="phone">
+                        Phone Number
+                      </label>
+                      <div className="relative">
+                        <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-300/80" aria-hidden="true" />
+                        <input
+                          id="phone"
+                          value={form.phone}
+                          onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                          className="h-10 w-full rounded-lg border border-gold-400/20 bg-transparent pl-9 pr-3 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-gold-400/45"
+                          placeholder="01XXXXXXXXX"
+                          inputMode="tel"
+                          autoComplete="tel"
+                          required
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -889,7 +915,7 @@ export default function ServicesPage() {
                 <Droplets className="h-3.5 w-3.5" />
                 <span>Wash Service</span>
               </div>
-              <h2 className="text-3xl font-bold text-white sm:text-4xl">Car Exterior Wash Services</h2>
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">Car Exterior Wash Service</h2>
               <p className="text-lg font-medium text-slate-200">A perfect choice for quick and effective cleaning.</p>
               <p className="text-base text-slate-300/90 leading-relaxed">
                 We use high-pressure water, gentle foam, and eco-friendly shampoo to remove dirt and grime while protecting your car&apos;s paint.
@@ -984,7 +1010,7 @@ export default function ServicesPage() {
                 <Sparkles className="h-3.5 w-3.5" />
                 <span>Interior & Exterior</span>
               </div>
-              <h2 className="text-3xl font-bold text-white sm:text-4xl">Interior Deep Cleaning + Exterior Wash</h2>
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">Interior Deep Clean + Exterior Wash</h2>
               <p className="text-lg font-medium text-slate-200">Ideal for a full car refresh. Clean both inside and outside of your car.</p>
               <p className="text-base text-slate-300/90 leading-relaxed">
                 Our trained team carefully cleans your car&apos;s interior and exterior with specialized tools and safe detergents.
@@ -1039,7 +1065,7 @@ export default function ServicesPage() {
                 <ShieldCheck className="h-3.5 w-3.5" />
                 <span>Premium Protection</span>
               </div>
-              <h2 className="text-3xl font-bold text-white sm:text-4xl">Premium Polish & Ceramic Protection</h2>
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">Polish & Ceramic Protection</h2>
               <p className="text-lg font-medium text-slate-200">Restore showroom shine and lock it in with long-lasting protection.</p>
               <p className="text-base text-slate-300/90 leading-relaxed">
                 Eliminate swirls and scratches while adding a hydrophobic ceramic layer that repels water and dirt for months.
