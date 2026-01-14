@@ -141,28 +141,8 @@ export async function POST(request: Request) {
   };
 
   let bookingId: string | number | null = null;
-
-  if (supabaseAdmin && bookingsTableName) {
-    const { data: bookingRow, error: bookingError } = await supabaseAdmin
-      .from(bookingsTableName)
-      .upsert(insertPayload, {
-        onConflict: "phone,requested_datetime,service,car_type",
-      })
-      .select("id")
-      .single();
-
-    if (bookingError || !bookingRow?.id) {
-      return NextResponse.json(
-        {
-          status: "error",
-          message: bookingError?.message ?? "Failed to save booking request.",
-        },
-        { status: 500 }
-      );
-    }
-
-    bookingId = bookingRow.id;
-  }
+  let savedToSupabase = false;
+  let supabaseSaveErrorMessage: string | null = null;
 
   const formBody = new URLSearchParams();
   formBody.set("service", service);
@@ -177,6 +157,7 @@ export async function POST(request: Request) {
 
   let formspreeStatus: number | null = null;
   let formspreeResponse: unknown = null;
+  let emailSent = false;
 
   try {
     const formspreeRes = await fetch(FORMSPREE_BOOKING_ENDPOINT, {
@@ -191,14 +172,31 @@ export async function POST(request: Request) {
     formspreeStatus = formspreeRes.status;
     formspreeResponse = await safeJson(formspreeRes);
 
-    if (supabaseAdmin && bookingsTableName && bookingId != null) {
-      await supabaseAdmin
+    emailSent = formspreeRes.ok;
+
+    if (supabaseAdmin && bookingsTableName) {
+      const { data: bookingRow, error: bookingError } = await supabaseAdmin
         .from(bookingsTableName)
-        .update({
-          formspree_status: formspreeStatus,
-          formspree_response: formspreeResponse,
-        })
-        .eq("id", bookingId);
+        .upsert(
+          {
+            ...insertPayload,
+            formspree_status: formspreeStatus,
+            formspree_response: formspreeResponse,
+          },
+          {
+            onConflict: "phone,requested_datetime,service,car_type",
+          }
+        )
+        .select("id")
+        .single();
+
+      if (bookingError || !bookingRow?.id) {
+        savedToSupabase = false;
+        supabaseSaveErrorMessage = bookingError?.message ?? "Failed to save booking request.";
+      } else {
+        bookingId = bookingRow.id;
+        savedToSupabase = true;
+      }
     }
 
     if (!formspreeRes.ok) {
@@ -210,20 +208,42 @@ export async function POST(request: Request) {
               ? "Booking saved, but email notification failed. Please try again."
               : "Email notification failed. Please try again.",
           bookingId,
-          supabase: bookingId == null && supabaseMisconfiguredMessage ? supabaseMisconfiguredMessage : undefined,
+          savedToSupabase,
+          emailSent,
+          supabase:
+            (!savedToSupabase && (supabaseSaveErrorMessage || supabaseMisconfiguredMessage))
+              ? supabaseSaveErrorMessage ?? supabaseMisconfiguredMessage
+              : undefined,
         },
         { status: 502 }
       );
     }
   } catch {
-    if (supabaseAdmin && bookingsTableName && bookingId != null) {
-      await supabaseAdmin
+    emailSent = false;
+
+    if (supabaseAdmin && bookingsTableName) {
+      const { data: bookingRow, error: bookingError } = await supabaseAdmin
         .from(bookingsTableName)
-        .update({
-          formspree_status: formspreeStatus,
-          formspree_response: formspreeResponse,
-        })
-        .eq("id", bookingId);
+        .upsert(
+          {
+            ...insertPayload,
+            formspree_status: formspreeStatus,
+            formspree_response: formspreeResponse,
+          },
+          {
+            onConflict: "phone,requested_datetime,service,car_type",
+          }
+        )
+        .select("id")
+        .single();
+
+      if (bookingError || !bookingRow?.id) {
+        savedToSupabase = false;
+        supabaseSaveErrorMessage = bookingError?.message ?? "Failed to save booking request.";
+      } else {
+        bookingId = bookingRow.id;
+        savedToSupabase = true;
+      }
     }
 
     return NextResponse.json(
@@ -234,7 +254,12 @@ export async function POST(request: Request) {
             ? "Booking saved, but email notification failed. Please try again."
             : "Email notification failed. Please try again.",
         bookingId,
-        supabase: bookingId == null && supabaseMisconfiguredMessage ? supabaseMisconfiguredMessage : undefined,
+        savedToSupabase,
+        emailSent,
+        supabase:
+          (!savedToSupabase && (supabaseSaveErrorMessage || supabaseMisconfiguredMessage))
+            ? supabaseSaveErrorMessage ?? supabaseMisconfiguredMessage
+            : undefined,
       },
       { status: 502 }
     );
@@ -243,6 +268,11 @@ export async function POST(request: Request) {
   return NextResponse.json({
     status: "ok",
     bookingId,
-    supabase: bookingId == null && supabaseMisconfiguredMessage ? supabaseMisconfiguredMessage : undefined,
+    savedToSupabase,
+    emailSent,
+    supabase:
+      (!savedToSupabase && (supabaseSaveErrorMessage || supabaseMisconfiguredMessage))
+        ? supabaseSaveErrorMessage ?? supabaseMisconfiguredMessage
+        : undefined,
   });
 }
