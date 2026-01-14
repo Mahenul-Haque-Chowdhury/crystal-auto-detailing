@@ -747,6 +747,8 @@ export default function ServicesPage() {
                     </div>
                   )}
 
+                  <div className="text-xs font-semibold text-white">Water &amp; Electricity Required*</div>
+
                   <button
                     type="submit"
                     disabled={isSubmitting}
