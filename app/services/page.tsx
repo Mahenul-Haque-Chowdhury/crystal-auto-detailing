@@ -370,7 +370,7 @@ export default function ServicesPage() {
           status.type === 'success' &&
           createPortal(
             <div
-              className="fixed inset-0 z-[200] flex items-center justify-center px-4"
+              className="fixed inset-0 z-200 flex items-center justify-center px-4"
               role="dialog"
               aria-modal="true"
               aria-label="Booking request submitted"
