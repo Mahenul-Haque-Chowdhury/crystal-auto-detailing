@@ -361,14 +361,14 @@ export default function ServicesPage() {
       <main className="bg-transparent font-sans text-slate-100">
         {isSuccessModalOpen && status.type === 'success' && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center px-4"
+            className="fixed inset-0 z-[100] flex items-center justify-center px-4"
             role="dialog"
             aria-modal="true"
             aria-label="Booking request submitted"
           >
             <button
               type="button"
-              className="absolute inset-0 bg-black/60"
+              className="absolute inset-0 z-0 bg-black/60"
               onClick={() => {
                 setIsSuccessModalOpen(false);
                 setStatus({ type: 'idle' });
@@ -377,7 +377,7 @@ export default function ServicesPage() {
             />
 
             <div
-              className="relative w-full max-w-md rounded-2xl border border-gold-400/30 bg-slate-950/95 p-5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.85)]"
+              className="relative z-10 w-full max-w-md rounded-2xl border border-gold-400/30 bg-slate-950/95 p-5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.85)]"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-start justify-between gap-4">
