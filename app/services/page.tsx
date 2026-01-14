@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import GlassSurface from '@/components/GlassSurface';
@@ -192,6 +193,11 @@ export default function ServicesPage() {
   >({ type: 'idle' });
 
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isSuccessModalOpen) return;
@@ -359,61 +365,65 @@ export default function ServicesPage() {
   return (
     <PageWrapper>
       <main className="bg-transparent font-sans text-slate-100">
-        {isSuccessModalOpen && status.type === 'success' && (
-          <div
-            className="fixed inset-0 z-[100] flex items-center justify-center px-4"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Booking request submitted"
-          >
-            <button
-              type="button"
-              className="absolute inset-0 z-0 bg-black/60"
-              onClick={() => {
-                setIsSuccessModalOpen(false);
-                setStatus({ type: 'idle' });
-              }}
-              aria-label="Close"
-            />
-
+        {isMounted &&
+          isSuccessModalOpen &&
+          status.type === 'success' &&
+          createPortal(
             <div
-              className="relative z-10 w-full max-w-md rounded-2xl border border-gold-400/30 bg-slate-950/95 p-5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.85)]"
-              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 z-[200] flex items-center justify-center px-4"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Booking request submitted"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="text-lg font-semibold text-radiant-gold">Success</div>
-                  <p className="mt-1 text-sm text-slate-200/85">{status.message}</p>
+              <button
+                type="button"
+                className="absolute inset-0 z-0 bg-black/60"
+                onClick={() => {
+                  setIsSuccessModalOpen(false);
+                  setStatus({ type: 'idle' });
+                }}
+                aria-label="Close"
+              />
+
+              <div
+                className="relative z-10 w-full max-w-md rounded-2xl border border-gold-400/30 bg-slate-950/95 p-5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.85)]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-lg font-semibold text-radiant-gold">Success</div>
+                    <p className="mt-1 text-sm text-slate-200/85">{status.message}</p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSuccessModalOpen(false);
+                      setStatus({ type: 'idle' });
+                    }}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-100 transition hover:bg-white/10"
+                    aria-label="Close popup"
+                  >
+                    <span aria-hidden="true">×</span>
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsSuccessModalOpen(false);
-                    setStatus({ type: 'idle' });
-                  }}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-100 transition hover:bg-white/10"
-                  aria-label="Close popup"
-                >
-                  <span aria-hidden="true">×</span>
-                </button>
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSuccessModalOpen(false);
+                      setStatus({ type: 'idle' });
+                    }}
+                    className="inline-flex h-10 items-center justify-center rounded-lg bg-polish-gold px-4 text-sm font-semibold text-black transition hover:bg-gold-300"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
-
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsSuccessModalOpen(false);
-                    setStatus({ type: 'idle' });
-                  }}
-                  className="inline-flex h-10 items-center justify-center rounded-lg bg-polish-gold px-4 text-sm font-semibold text-black transition hover:bg-gold-300"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body
+          )}
 
         {/* Hero + Booking */}
         <section className="bg-transparent">
