@@ -158,6 +158,7 @@ export async function POST(request: Request) {
   let formspreeStatus: number | null = null;
   let formspreeResponse: unknown = null;
   let emailSent = false;
+  let emailErrorMessage: string | null = null;
 
   try {
     const formspreeRes = await fetch(FORMSPREE_BOOKING_ENDPOINT, {
@@ -173,6 +174,9 @@ export async function POST(request: Request) {
     formspreeResponse = await safeJson(formspreeRes);
 
     emailSent = formspreeRes.ok;
+    if (!formspreeRes.ok) {
+      emailErrorMessage = `Formspree responded with status ${formspreeRes.status}`;
+    }
 
     if (supabaseAdmin && bookingsTableName) {
       const { data: bookingRow, error: bookingError } = await supabaseAdmin
@@ -200,13 +204,36 @@ export async function POST(request: Request) {
     }
 
     if (!formspreeRes.ok) {
+      // If the booking is saved in Supabase, treat the submission as successful.
+      // This prevents users from retrying and creating duplicates, while still
+      // surfacing the email failure for debugging.
+      if (savedToSupabase) {
+        console.error("Formspree failed but booking saved", {
+          formspreeStatus,
+          formspreeResponse,
+          bookingId,
+        });
+
+        return NextResponse.json({
+          status: "ok",
+          bookingId,
+          savedToSupabase,
+          emailSent,
+          warning: "Saved successfully, but email notification failed.",
+        });
+      }
+
+      console.error("Formspree failed and booking not saved", {
+        formspreeStatus,
+        formspreeResponse,
+        supabaseSaveErrorMessage,
+        supabaseMisconfiguredMessage,
+      });
+
       return NextResponse.json(
         {
           status: "formspree_error",
-          message:
-            bookingId != null
-              ? "Booking saved, but email notification failed. Please try again."
-              : "Email notification failed. Please try again.",
+          message: "Email notification failed. Please try again.",
           bookingId,
           savedToSupabase,
           emailSent,
@@ -220,6 +247,7 @@ export async function POST(request: Request) {
     }
   } catch {
     emailSent = false;
+    emailErrorMessage = "Formspree request failed";
 
     if (supabaseAdmin && bookingsTableName) {
       const { data: bookingRow, error: bookingError } = await supabaseAdmin
@@ -246,13 +274,33 @@ export async function POST(request: Request) {
       }
     }
 
+    if (savedToSupabase) {
+      console.error("Formspree threw but booking saved", {
+        formspreeStatus,
+        formspreeResponse,
+        bookingId,
+      });
+
+      return NextResponse.json({
+        status: "ok",
+        bookingId,
+        savedToSupabase,
+        emailSent,
+        warning: "Saved successfully, but email notification failed.",
+      });
+    }
+
+    console.error("Formspree threw and booking not saved", {
+      formspreeStatus,
+      formspreeResponse,
+      supabaseSaveErrorMessage,
+      supabaseMisconfiguredMessage,
+    });
+
     return NextResponse.json(
       {
         status: "formspree_error",
-        message:
-          bookingId != null
-            ? "Booking saved, but email notification failed. Please try again."
-            : "Email notification failed. Please try again.",
+        message: "Email notification failed. Please try again.",
         bookingId,
         savedToSupabase,
         emailSent,
@@ -263,6 +311,17 @@ export async function POST(request: Request) {
       },
       { status: 502 }
     );
+  }
+
+  if (!savedToSupabase && (supabaseSaveErrorMessage || supabaseMisconfiguredMessage)) {
+    console.error("Booking not saved to Supabase", {
+      supabaseSaveErrorMessage,
+      supabaseMisconfiguredMessage,
+      emailSent,
+      emailErrorMessage,
+      formspreeStatus,
+      formspreeResponse,
+    });
   }
 
   return NextResponse.json({
