@@ -194,9 +194,21 @@ export default function ServicesPage() {
 
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [minDateTime, setMinDateTime] = useState('');
 
   useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    const mm = pad(now.getMonth() + 1);
+    const dd = pad(now.getDate());
+    const hh = pad(now.getHours());
+    const mi = pad(now.getMinutes());
+    setMinDateTime(`${yyyy}-${mm}-${dd}T${hh}:${mi}`);
   }, []);
 
   useEffect(() => {
@@ -207,17 +219,6 @@ export default function ServicesPage() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isSuccessModalOpen]);
-
-  const minDateTime = useMemo(() => {
-    const now = new Date();
-    const pad = (n: number) => String(n).padStart(2, '0');
-    const yyyy = now.getFullYear();
-    const mm = pad(now.getMonth() + 1);
-    const dd = pad(now.getDate());
-    const hh = pad(now.getHours());
-    const mi = pad(now.getMinutes());
-    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
-  }, []);
 
   const estimatedPrice = useMemo(() => getEstimatedPrice(form.service, form.carType), [form.service, form.carType]);
 
@@ -706,7 +707,7 @@ export default function ServicesPage() {
                       <input
                         id="dateTime"
                         type="datetime-local"
-                        min={minDateTime}
+                        min={minDateTime || undefined}
                         value={form.dateTimeLocal}
                         onChange={(e) => setForm((p) => ({ ...p, dateTimeLocal: e.target.value }))}
                         className={classNames(

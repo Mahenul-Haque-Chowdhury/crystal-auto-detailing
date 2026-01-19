@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
-import AdaptiveBackgroundVideo from "@/components/AdaptiveBackgroundVideo";
+import BackgroundMedia from "@/components/BackgroundMedia";
 import BackgroundVideoGate from "@/components/BackgroundVideoGate";
 import SiteChrome from "@/components/SiteChrome";
 import { MotionProvider } from "@/components/animations";
@@ -27,13 +28,16 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const ua = (await headers()).get("user-agent") ?? "";
+  const initialIsAndroid = /Android/i.test(ua);
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
         className={`${crystalGrotesk.variable} antialiased`}
         suppressHydrationWarning
@@ -43,7 +47,10 @@ export default function RootLayout({
             {/* Global background (video only) */}
             <div className="fixed inset-0 -z-10 overflow-hidden">
               <div className="absolute inset-0 bg-linear-to-b from-slate-950 via-slate-950 to-black" />
-              <AdaptiveBackgroundVideo className="absolute inset-0 h-full w-full scale-105 object-cover object-center" />
+              <BackgroundMedia
+                initialIsAndroid={initialIsAndroid}
+                className="absolute inset-0 h-full w-full scale-105 object-cover object-center"
+              />
               <div className="backdrop-fade absolute inset-0" />
             </div>
 

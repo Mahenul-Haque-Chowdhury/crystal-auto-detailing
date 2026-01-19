@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -13,6 +14,7 @@ const CALL_NOW_TEL = "tel:+8801841353850";
 
 const navItems = [
   { href: "/about", label: "About" },
+  { href: "/gallery", label: "Gallery" },
   { href: "/discounts", label: "Discounts" },
 ] as const;
 
@@ -25,11 +27,19 @@ export default function SiteHeader() {
   const pathname = usePathname();
   const prefersReducedMotion = useReducedMotion();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const justOpenedRef = useRef(false);
+  const [isOverlayArmed, setIsOverlayArmed] = useState(false);
 
   const headerRef = useRef<HTMLElement | null>(null);
   const lastScrollYRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const [isHidden, setIsHidden] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -107,6 +117,48 @@ export default function SiteHeader() {
   }, [isMenuOpen]);
 
   useEffect(() => {
+    if (!isMenuOpen) {
+      setIsOverlayArmed(false);
+      return;
+    }
+
+    const armId = window.setTimeout(() => setIsOverlayArmed(true), 250);
+    return () => window.clearTimeout(armId);
+  }, [isMenuOpen]);
+
+  const openMenu = () => {
+    setIsHidden(false);
+    setIsMenuOpen(true);
+    justOpenedRef.current = true;
+    window.setTimeout(() => {
+      justOpenedRef.current = false;
+    }, 250);
+  };
+
+  const closeMenu = () => setIsMenuOpen(false);
+  const toggleMenu = () => {
+    if (isMenuOpen) {
+      closeMenu();
+      return;
+    }
+
+    openMenu();
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isMenuOpen) return;
+
+    const focusId = window.setTimeout(() => {
+      closeButtonRef.current?.focus();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(focusId);
+    };
+  }, [isMenuOpen]);
+
+  useEffect(() => {
     if (typeof document === "undefined") return;
 
     const html = document.documentElement;
@@ -159,6 +211,7 @@ export default function SiteHeader() {
                   alt="Crystal Valley Auto Detail"
                   width={96}
                   height={96}
+                  sizes="(max-width: 768px) 80px, 96px"
                   className="h-12 w-12 origin-left scale-[1.8] object-contain md:scale-[2.0]"
                   priority
                 />
@@ -230,114 +283,100 @@ export default function SiteHeader() {
             </nav>
 
             <button
+              ref={closeButtonRef}
               type="button"
-              className="inline-flex items-center justify-center rounded-lg p-2 text-radiant-gold hover:bg-slate-950/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300/60 md:hidden"
-              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300/60 md:hidden ${
+                isMenuOpen ? "opacity-0 pointer-events-none" : "text-radiant-gold hover:bg-slate-950/40"
+              }`}
+              aria-label="Open menu"
               aria-expanded={isMenuOpen}
               aria-controls="mobile-primary-nav"
-              onClick={() => setIsMenuOpen((prev) => !prev)}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                openMenu();
+              }}
             >
               <span className="flex flex-col items-end gap-1.5" aria-hidden="true">
                 <span
-                  className={`block h-0.5 rounded bg-current transition-transform duration-300 ease-out ${
-                    isMenuOpen ? "w-6 translate-y-2 rotate-45" : "w-6"
-                  }`}
+                  className="block h-0.5 w-6 rounded bg-current transition-transform duration-300 ease-out"
                 />
                 <span
-                  className={`block h-0.5 rounded bg-current transition-all duration-300 ease-out ${
-                    isMenuOpen ? "w-6 opacity-0" : "w-5 opacity-90"
-                  }`}
+                  className="block h-0.5 w-5 rounded bg-current opacity-90 transition-all duration-300 ease-out"
                 />
                 <span
-                  className={`block h-0.5 rounded bg-current transition-transform duration-300 ease-out ${
-                    isMenuOpen ? "w-6 -translate-y-2 -rotate-45" : "w-4 opacity-80"
-                  }`}
+                  className="block h-0.5 w-4 rounded bg-current opacity-80 transition-transform duration-300 ease-out"
                 />
               </span>
             </button>
           </div>
         </GlassSurface>
 
-        {/* Mobile menu overlay + dropdown (outside GlassSurface to avoid overflow clipping) */}
-        <div className="md:hidden">
-          <AnimatePresence>
-            {isMenuOpen && (
-              <motion.button
-                type="button"
-                aria-hidden={!isMenuOpen}
-                tabIndex={isMenuOpen ? 0 : -1}
-                className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-                onClick={() => setIsMenuOpen(false)}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              />
-            )}
-          </AnimatePresence>
-
-          <AnimatePresence>
-            {isMenuOpen && (
-              <motion.div
-                id="mobile-primary-nav"
-                className="absolute left-0 right-0 top-full z-50 border-b border-gold-400/15 bg-slate-950/70 backdrop-blur-sm"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-1 px-4 py-3">
-                  {navItems.map((item, index) => (
-                    (() => {
-                      const active = isActiveHref(pathname, item.href);
-                      return (
-                    <motion.div
-                      key={item.href}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05, duration: 0.3 }}
-                    >
-                      <GlassSurface
-                        width="100%"
-                        height="auto"
-                        borderRadius={14}
-                        backgroundOpacity={0.14}
-                        saturation={1.25}
-                        tint={active ? "rgba(2, 6, 23, 0.78)" : "rgba(2, 6, 23, 0.6)"}
-                        className={active ? "border border-gold-300/30" : "border border-white/10"}
-                      >
-                        <Link
-                          href={item.href}
-                          className={
-                            "block rounded-[14px] px-4 py-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300/60 " +
-                            (active
-                              ? "text-gold-100"
-                              : "text-slate-100/90 hover:text-gold-100")
-                          }
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          {item.label}
-                        </Link>
-                      </GlassSurface>
-                    </motion.div>
-                      );
-                    })()
-                  ))}
-                  <motion.a
-                    href={CALL_NOW_TEL}
-                    className="mt-2 rounded-[14px] bg-polish-gold px-4 py-3 text-center text-sm font-extrabold tracking-tight text-black shadow-[0_14px_40px_rgba(0,0,0,0.35)] transition hover:brightness-110"
-                    onClick={() => setIsMenuOpen(false)}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1, duration: 0.3 }}
+        {/* Mobile menu overlay (Portal to body to escape header transform) */}
+        {mounted && createPortal(
+          <div className="md:hidden relative z-[9999]">
+            <AnimatePresence>
+              {isMenuOpen && (
+                <>
+                  <motion.div
+                    key="backdrop"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+                    onClick={closeMenu}
+                  />
+                  <motion.div
+                    key="menu-panel"
+                    className="fixed inset-y-0 right-0 z-10 flex w-full max-w-[300px] flex-col border-l border-gold-400/20 bg-slate-950 shadow-2xl"
+                    initial={{ x: "100%" }}
+                    animate={{ x: 0 }}
+                    exit={{ x: "100%" }}
+                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
                   >
-                    Call now
-                  </motion.a>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                    <div className="flex items-center justify-between border-b border-white/10 p-4">
+                      <span className="text-lg font-bold text-white">Menu</span>
+                      <button
+                        onClick={closeMenu}
+                        className="rounded-lg p-2 text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300/60"
+                        aria-label="Close menu"
+                      >
+                        <span className="text-2xl leading-none" aria-hidden="true">×</span>
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-2 overflow-y-auto p-4">
+                      {navItems.map((item) => {
+                        const active = isActiveHref(pathname, item.href);
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={closeMenu}
+                            className={`block rounded-lg px-4 py-3 text-lg font-medium transition-colors ${
+                              active
+                                ? "bg-white/10 text-gold-100"
+                                : "text-slate-100 hover:bg-white/5 hover:text-gold-100"
+                            }`}
+                          >
+                            {item.label}
+                          </Link>
+                        );
+                      })}
+                      <a
+                        href={CALL_NOW_TEL}
+                        className="mt-4 block rounded-lg bg-polish-gold px-4 py-3 text-center text-lg font-bold text-black shadow-lg hover:brightness-110"
+                        onClick={closeMenu}
+                      >
+                        Call Now
+                      </a>
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>,
+          document.body
+        )}
       </div>
     </motion.header>
   );
