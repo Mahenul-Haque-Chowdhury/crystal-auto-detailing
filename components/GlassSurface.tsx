@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useIsAndroid } from "./useIsAndroid";
 
 type Channel = "R" | "G" | "B" | "A";
 
@@ -60,6 +61,7 @@ const GlassSurface = ({
   forceCssFallback = false,
   ...rest
 }: GlassSurfaceProps) => {
+  const isAndroid = useIsAndroid();
   const uniqueId = useId().replace(/:/g, "-");
   const filterId = `glass-filter-${uniqueId}`;
   const redGradId = `red-grad-${uniqueId}`;
@@ -201,9 +203,28 @@ const GlassSurface = ({
     '--glass-frost': backgroundOpacity,
     '--glass-saturation': saturation,
     '--filter-id': `url(#${filterId})`,
-    backgroundColor: tint,
+    backgroundColor: isAndroid ? "rgba(0, 0, 0, 0.6)" : tint,
     ...style,
   } as CSSProperties;
+
+  if (isAndroid) {
+    return (
+      <div
+        ref={containerRef}
+        className={`glass-surface glass-surface--android ${className}`.trim()}
+        style={{
+          ...containerStyle,
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+          boxShadow: "none",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+        }}
+        {...rest}
+      >
+         <div className="glass-surface__content">{children}</div>
+      </div>
+    );
+  }
 
   return (
     <div
