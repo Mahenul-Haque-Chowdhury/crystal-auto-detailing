@@ -728,7 +728,7 @@ export default function ServicesPage() {
                         id="remarks"
                         value={form.remarks}
                         onChange={(e) => setForm((p) => ({ ...p, remarks: e.target.value }))}
-                        className="min-h-[96px] w-full resize-none rounded-lg border border-gold-400/20 bg-transparent px-3 py-2 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-gold-400/45"
+                        className="min-h-24 w-full resize-none rounded-lg border border-gold-400/20 bg-transparent px-3 py-2 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-gold-400/45"
                         placeholder="Any notes (preferred time, exact location, special requests, etc.)"
                         maxLength={1000}
                       />

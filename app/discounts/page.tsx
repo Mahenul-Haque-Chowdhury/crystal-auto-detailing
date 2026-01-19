@@ -15,6 +15,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useIsAndroid } from "@/components/useIsAndroid";
 
 const migra = localFont({
   src: [
@@ -38,6 +39,7 @@ type GlassButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   borderRadius?: number;
   surfaceClassName?: string;
   surfaceProps?: Partial<GlassSurfaceProps>;
+  isAndroid?: boolean;
 };
 
 const DISCOUNT_STORAGE_KEY = "cvad:discounts:v1";
@@ -89,6 +91,7 @@ const GlassButton = ({
   borderRadius = 999,
   surfaceClassName = "",
   surfaceProps,
+  isAndroid = false,
   ...props
 }: GlassButtonProps) => {
   const {
@@ -97,6 +100,17 @@ const GlassButton = ({
     tint = "rgba(9, 12, 24, 0.82)",
     ...restSurfaceProps
   } = surfaceProps ?? {};
+
+  if (isAndroid) {
+    return (
+      <button
+        {...props}
+        className={`flex items-center justify-center gap-2 rounded-full border border-white/20 bg-black/40 px-6 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-white backdrop-blur-sm transition hover:bg-black/60 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 ${className} ${surfaceClassName}`.trim()}
+      >
+        {children}
+      </button>
+    );
+  }
 
   return (
     <GlassSurface
@@ -128,10 +142,12 @@ const HeroSection = memo(function HeroSection({
   migraClassName,
   isDiscountOpen,
   onExplore,
+  isAndroid,
 }: {
   migraClassName: string;
   isDiscountOpen: boolean;
   onExplore: () => void;
+  isAndroid: boolean;
 }) {
   return (
     <section className="relative h-dvh min-h-svh">
@@ -190,6 +206,7 @@ const HeroSection = memo(function HeroSection({
                   surfaceClassName="w-full"
                   surfaceProps={{ tint: "rgba(255, 255, 255, 0.16)", backgroundOpacity: 0.18, blur: 18 }}
                   onClick={onExplore}
+                  isAndroid={isAndroid}
                 >
                   Explore Discount
                   <svg
@@ -212,25 +229,36 @@ const HeroSection = memo(function HeroSection({
             )}
           </AnimatePresence>
 
-          {!isDiscountOpen ? (
-            <GlassSurface
-              width="100%"
-              height="auto"
-              borderRadius={999}
-              backgroundOpacity={0.12}
-              saturation={1.15}
-              tint="rgba(2, 6, 23, 0.5)"
-              className="w-full border border-white/10"
-              style={{ padding: 0 }}
-            >
-              <Link
-                href="/"
-                className="block w-full rounded-full px-5 py-2.5 text-center text-xs font-semibold tracking-[0.22em] text-white/85 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300/60"
-              >
-                Back to Home
-              </Link>
-            </GlassSurface>
-          ) : null}
+          <AnimatePresence>
+            {!isDiscountOpen ? (
+              isAndroid ? (
+                <Link
+                  href="/"
+                  className="block w-full rounded-full border border-white/20 bg-black/40 px-5 py-2.5 text-center text-xs font-semibold tracking-[0.22em] text-white/85 backdrop-blur-sm transition hover:bg-black/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300/60"
+                >
+                  Back to Home
+                </Link>
+              ) : (
+                <GlassSurface
+                  width="100%"
+                  height="auto"
+                  borderRadius={999}
+                  backgroundOpacity={0.12}
+                  saturation={1.15}
+                  tint="rgba(2, 6, 23, 0.5)"
+                  className="w-full border border-white/10"
+                  style={{ padding: 0 }}
+                >
+                  <Link
+                    href="/"
+                    className="block w-full rounded-full px-5 py-2.5 text-center text-xs font-semibold tracking-[0.22em] text-white/85 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300/60"
+                  >
+                    Back to Home
+                  </Link>
+                </GlassSurface>
+              )
+            ) : null}
+          </AnimatePresence>
         </motion.div>
 
         {/* Desktop: Explore Discount button */}
@@ -245,27 +273,37 @@ const HeroSection = memo(function HeroSection({
             className="border border-white/30 px-8 py-3 text-sm tracking-[0.4em]"
             surfaceProps={{ tint: "rgba(255, 255, 255, 0.16)", backgroundOpacity: 0.18, blur: 18 }}
             onClick={onExplore}
+            isAndroid={isAndroid}
           >
             Explore Discount
           </GlassButton>
 
-          <GlassSurface
-            width="auto"
-            height="auto"
-            borderRadius={999}
-            backgroundOpacity={0.14}
-            saturation={1.25}
-            tint="rgba(2, 6, 23, 0.55)"
-            className="border border-white/12"
-            style={{ padding: 0 }}
-          >
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-[0.22em] text-white/90 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300/60"
+          {isAndroid ? (
+             <Link
+               href="/"
+               className="inline-flex items-center justify-center rounded-full border border-white/20 bg-black/40 px-6 py-3 text-sm font-semibold tracking-[0.22em] text-white/90 backdrop-blur-sm transition hover:bg-black/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300/60"
+             >
+               Back to Home
+             </Link>
+          ) : (
+            <GlassSurface
+              width="auto"
+              height="auto"
+              borderRadius={999}
+              backgroundOpacity={0.14}
+              saturation={1.25}
+              tint="rgba(2, 6, 23, 0.55)"
+              className="border border-white/12"
+              style={{ padding: 0 }}
             >
-              Back to Home
-            </Link>
-          </GlassSurface>
+              <Link
+                href="/"
+                className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-[0.22em] text-white/90 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300/60"
+              >
+                Back to Home
+              </Link>
+            </GlassSurface>
+          )}
         </motion.div>
 
       </div>
@@ -274,6 +312,7 @@ const HeroSection = memo(function HeroSection({
 });
 
 export default function Home() {
+  const isAndroid = useIsAndroid();
   const [isDiscountOpen, setIsDiscountOpen] = useState(false);
   const [hasDiscountInteracted, setHasDiscountInteracted] = useState(false);
   const [formData, setFormData] = useState<FormFields>({
@@ -484,7 +523,7 @@ export default function Home() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <HeroSection migraClassName={migra.className} isDiscountOpen={isDiscountOpen} onExplore={handleExplore} />
+      <HeroSection migraClassName={migra.className} isDiscountOpen={isDiscountOpen} onExplore={handleExplore} isAndroid={isAndroid} />
 
       {!isDiscountOpen && (
         <div

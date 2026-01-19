@@ -314,7 +314,7 @@ export default function SiteHeader() {
 
         {/* Mobile menu overlay (Portal to body to escape header transform) */}
         {mounted && createPortal(
-          <div className="md:hidden relative z-[9999]">
+          <div className="md:hidden relative z-50">
             <AnimatePresence>
               {isMenuOpen && (
                 <>

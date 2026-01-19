@@ -9,8 +9,9 @@ type AndroidHeroSlideshowProps = {
 };
 
 const SLIDES = ["/slide1.png", "/slide2.png", "/slide3.png", "/slide4.png"] as const;
-const HOLD_MS = 4000;
-const FADE_MS = 1200;
+const HOLD_MS = 2500; // Faster
+const FADE_MS = 800;  // Quicker fade
+
 const VIDEO_WARM_KEY = "cvad:bgVideoWarm:v1";
 const VIDEO_DISABLED_EVENT = "cvad:bgVideoDisabled";
 
@@ -79,8 +80,8 @@ export default function AndroidHeroSlideshow({ className = "" }: AndroidHeroSlid
           priority={index === 0}
           loading={index === 0 ? "eager" : "lazy"}
           className={
-            "absolute inset-0 object-cover transition-opacity duration-[1200ms] ease-in-out motion-reduce:transition-none " +
-            (index === activeIndex ? "opacity-100" : "opacity-0")
+            "absolute inset-0 object-cover transition-opacity duration-700 ease-in-out motion-reduce:transition-none " +
+            (index === activeIndex ? "opacity-100 z-10" : "opacity-0 z-0")
           }
         />
       ))}
