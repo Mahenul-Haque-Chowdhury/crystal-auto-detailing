@@ -83,7 +83,7 @@ function getEstimatedPrice(service: ServiceOption, carType: CarTypeOption): Esti
     case 'Super Wash & Interior':
       return {
         kind: 'exact',
-        amount: carType === 'Sedan' ? 1200 : 1500,
+        amount: carType === 'Sedan' ? 3500 : carType === 'SUV' ? 4500 : 5000,
       };
     case 'Single-Stage Polish':
       return {
@@ -112,7 +112,7 @@ export default function ServicesPage() {
   const serviceImageVersion = '2026-01-13-1';
   const packageImageVersion = '2026-01-13-2';
 
-  type PackageTabKey = 'sedan' | 'suv' | 'noah';
+  type PackageTabKey = 'sedan' | 'suv' | 'microbus';
 
   const packageTabs = useMemo(
     () =>
@@ -125,38 +125,38 @@ export default function ServicesPage() {
           items: [
             'Car Models: Toyota Allion, Premio, Axio, Corolla, Honda Grace, City, Nissan Sunny, Mitsubishi Lancer, and more',
             { label: 'Basic Wash:', price: '৳ 700 BDT' },
-            { label: 'Super Wash & Interior:', price: '৳ 1,200 BDT' },
+            { label: 'Super Wash and Interior Deep Cleaning:', price: '3,500/- (Recommended)' },
             { label: 'Single stage polish:', price: '৳ 4,500 BDT' },
             { label: 'Basic Ceramic:', price: '৳ 8,000 BDT' },
-            { label: 'Ceramic Care+:', price: '৳ 10,000 BDT' },
+            { label: 'Ceramic Care+:', price: '৳ 10,000 BDT (Recommended)' },
           ],
         },
         {
           key: 'suv' as const,
-          label: 'SUV / MUV',
+          label: 'SUV',
           imageSrc: `/suv.png?v=${packageImageVersion}`,
-          heading: 'SUV/MUV Car Service Details',
+          heading: 'SUV Car Service Details',
           items: [
             'Car Models: Toyota Harrier, RAV4, Prado, Nissan X-Trail, Honda CR-V, and more',
             { label: 'Basic Wash:', price: '৳ 900 BDT' },
-            { label: 'Super Wash & Interior:', price: '৳ 1,500 BDT' },
+            { label: 'Super Wash and Interior Deep Cleaning:', price: '4,500/- (Recommended)' },
             { label: 'Single stage polish:', price: '৳ 5,500 BDT' },
             { label: 'Basic Ceramic:', price: '৳ 10,000 BDT' },
-            { label: 'Ceramic Care+:', price: '৳ 12,500 BDT' },
+            { label: 'Ceramic Care+:', price: '৳ 12,500 BDT (Recommended)' },
           ],
         },
         {
-          key: 'noah' as const,
-          label: 'Noah / Hiace',
+          key: 'microbus' as const,
+          label: 'Micro Bus',
           imageSrc: `/noah.png?v=${packageImageVersion}`,
-          heading: 'Noah/Hiace Car Service Details',
+          heading: 'Micro Bus Car Service Details',
           items: [
             'Car Models: Toyota Noah, Voxy, Hiace, Microbus, and more',
             { label: 'Basic Wash:', price: '৳ 900 BDT' },
-            { label: 'Super Wash & Interior:', price: '৳ 1,500 BDT' },
+            { label: 'Super Wash and Interior Deep Cleaning:', price: '5,000/- (Recommended)' },
             { label: 'Single stage polish:', price: '৳ 6,500 BDT' },
             { label: 'Basic Ceramic:', price: '৳ 10,000 BDT' },
-            { label: 'Ceramic Care+:', price: '৳ 13,000 BDT' },
+            { label: 'Ceramic Care+:', price: '৳ 13,000 BDT (Recommended)' },
           ],
         },
       ] as const,
@@ -1023,7 +1023,7 @@ export default function ServicesPage() {
                 <Sparkles className="h-3.5 w-3.5" />
                 <span>Interior & Exterior</span>
               </div>
-              <h2 className="text-3xl font-bold text-white sm:text-4xl">Interior Deep Clean + Exterior Wash</h2>
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">Super Wash & Deep Interior Cleaning</h2>
               <p className="text-lg font-medium text-slate-200">Ideal for a full car refresh. Clean both inside and outside of your car.</p>
               <p className="text-base text-slate-300/90 leading-relaxed">
                 Our trained team carefully cleans your car&apos;s interior and exterior with specialized tools and safe detergents.
@@ -1033,14 +1033,14 @@ export default function ServicesPage() {
                 <h3 className="font-semibold text-radiant-gold">Deep Cleaning + Exterior Wash Services Includes:</h3>
                 <ul className="grid gap-3 sm:grid-cols-1">
                   {[
-                    "Exterior foam wash",
-                    "Dashboard and console cleaning",
-                    "Carpet and seat vacuum",
-                    "Door and handle polish",
-                    "Glass and mirror shine",
+                    'Foam wash & hand wash',
+                    'Wheel, tire & mat cleaning',
+                    'Full interior vacuum & wipe-down',
+                    'Glass cleaning & final finish',
+                    'Satisfaction Guaranteed',
                   ].map((item, i) => (
-                    <motion.li 
-                      key={i} 
+                    <motion.li
+                      key={i}
                       className="flex items-center gap-3 text-sm text-slate-200"
                       initial={{ opacity: 0, x: 20 }}
                       whileInView={{ opacity: 1, x: 0 }}
