@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import Script from "next/script";
 
 import BackgroundMedia from "@/components/BackgroundMedia";
 import BackgroundVideoGate from "@/components/BackgroundVideoGate";
@@ -42,6 +43,17 @@ export default async function RootLayout({
         className={`${crystalGrotesk.variable} antialiased`}
         suppressHydrationWarning
       >
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-GETR2PV4P1"
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+
+gtag('config', 'G-GETR2PV4P1');`}
+        </Script>
         <MotionProvider>
           <div className="relative min-h-dvh overflow-x-hidden">
             {/* Global background (video only) */}
