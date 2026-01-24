@@ -58,13 +58,13 @@ export default function SiteFooter() {
               
               {/* Social Media Links */}
               <div className="flex items-center justify-center gap-4 md:justify-start">
-                <SocialLink href="https://facebook.com" aria-label="Facebook">
+                <SocialLink href="https://www.facebook.com/CrystalValleyAutodetail" aria-label="Facebook">
                   <Facebook className="h-5 w-5" />
                 </SocialLink>
-                <SocialLink href="https://instagram.com" aria-label="Instagram">
+                <SocialLink href="https://www.instagram.com/crystalvalleyautodetail" aria-label="Instagram">
                   <Instagram className="h-5 w-5" />
                 </SocialLink>
-                <SocialLink href="https://linkedin.com" aria-label="LinkedIn">
+                <SocialLink href="https://www.linkedin.com/company/111493970/" aria-label="LinkedIn">
                   <Linkedin className="h-5 w-5" />
                 </SocialLink>
               </div>
@@ -105,9 +105,9 @@ export default function SiteFooter() {
                 <FooterLink href="/faq">FAQs</FooterLink>
                 
                 <div className="mt-2 flex flex-col items-center gap-3">
-                  <a href="mailto:contact@crystalvalley.autos" className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors group">
+                  <a href="mailto:riffattonmoy@crystalvalley.autos" className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors group">
                     <Mail className="h-4 w-4 text-gold-400 group-hover:text-gold-300" />
-                    <span>contact@crystalvalley.autos</span>
+                    <span>riffattonmoy@crystalvalley.autos</span>
                   </a>
                   <a href="tel:+8801841353850" className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors group">
                     <Phone className="h-4 w-4 text-gold-400 group-hover:text-gold-300" />
@@ -138,9 +138,9 @@ export default function SiteFooter() {
                 <FooterLink href="/faq">FAQs</FooterLink>
                 
                 <div className="mt-2 flex flex-col gap-3">
-                    <a href="mailto:contact@crystalvalley.autos" className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors group">
+                    <a href="mailto:riffattonmoy@crystalvalley.autos" className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors group">
                         <Mail className="h-4 w-4 text-gold-400 group-hover:text-gold-300" />
-                        <span>contact@crystalvalley.autos</span>
+                      <span>riffattonmoy@crystalvalley.autos</span>
                     </a>
                     <a href="tel:+8801841353850" className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors group">
                         <Phone className="h-4 w-4 text-gold-400 group-hover:text-gold-300" />
