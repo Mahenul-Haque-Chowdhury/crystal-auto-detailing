@@ -4,6 +4,7 @@ import {
   CSSProperties,
   HTMLAttributes,
   ReactNode,
+  useCallback,
   useEffect,
   useId,
   useRef,
@@ -74,12 +75,19 @@ const GlassSurface = ({
   const blueChannelRef = useRef<SVGFEDisplacementMapElement | null>(null);
   const gaussianBlurRef = useRef<SVGFEGaussianBlurElement | null>(null);
   const [canUseSvgFilters, setCanUseSvgFilters] = useState(false);
+  const svgCacheRef = useRef<{ key: string; uri: string }>({ key: '', uri: '' });
 
-  const generateDisplacementMap = () => {
+  const generateDisplacementMap = useCallback(() => {
     const rect = containerRef.current?.getBoundingClientRect();
     const actualWidth = rect?.width || 400;
     const actualHeight = rect?.height || 200;
     const edgeSize = Math.min(actualWidth, actualHeight) * (borderWidth * 0.5);
+
+    // Cache key based on dimensions + all visual params
+    const cacheKey = `${actualWidth}|${actualHeight}|${borderRadius}|${borderWidth}|${brightness}|${opacity}|${blur}|${mixBlendMode}`;
+    if (svgCacheRef.current.key === cacheKey) {
+      return svgCacheRef.current.uri;
+    }
 
     const svgContent = `
       <svg viewBox="0 0 ${actualWidth} ${actualHeight}" xmlns="http://www.w3.org/2000/svg">
@@ -100,14 +108,16 @@ const GlassSurface = ({
       </svg>
     `;
 
-    return `data:image/svg+xml,${encodeURIComponent(svgContent)}`;
-  };
+    const uri = `data:image/svg+xml,${encodeURIComponent(svgContent)}`;
+    svgCacheRef.current = { key: cacheKey, uri };
+    return uri;
+  }, [borderRadius, borderWidth, brightness, opacity, blur, mixBlendMode, redGradId, blueGradId]);
 
-  const updateDisplacementMap = () => {
+  const updateDisplacementMap = useCallback(() => {
     if (!canUseSvgFilters) return;
     if (!feImageRef.current) return;
     feImageRef.current.setAttribute('href', generateDisplacementMap());
-  };
+  }, [canUseSvgFilters, generateDisplacementMap]);
 
   useEffect(() => {
     if (!canUseSvgFilters) return;

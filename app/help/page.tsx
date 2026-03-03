@@ -1,43 +1,33 @@
-'use client';
-
-import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { PageWrapper } from '@/components/animations';
+
+export const metadata: Metadata = {
+  title: 'Help Center',
+  description: 'Get help with Crystal Valley Auto Detail bookings, services and account inquiries.',
+  openGraph: {
+    title: 'Help Center — Crystal Valley Auto Detail',
+    description: 'Get help with bookings, services and inquiries.',
+    url: 'https://crystalvalley.autos/help',
+  },
+};
 
 export default function HelpPage() {
   return (
-    <PageWrapper className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-      <motion.h1 
-        className="text-3xl font-bold text-radiant-gold sm:text-4xl"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+    <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center animate-fade-in-up">
+      <h1 className="text-3xl font-bold text-radiant-gold sm:text-4xl">
         Help Center
-      </motion.h1>
-      <motion.p 
-        className="mt-4 max-w-md text-lg text-slate-300"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.5 }}
-      >
+      </h1>
+      <p className="mt-4 max-w-md text-lg text-slate-300 animate-fade-in-up [animation-delay:100ms]">
         This page is currently under construction. Please check back later.
-      </motion.p>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
+      </p>
+      <div className="animate-fade-in-up [animation-delay:200ms]">
         <Link
           href="/"
-          className="mt-8 inline-block rounded-full bg-polish-gold px-8 py-3 font-semibold text-black transition hover:brightness-110"
+          className="mt-8 inline-block rounded-full bg-polish-gold px-8 py-3 font-semibold text-black transition hover:brightness-110 hover:scale-105 active:scale-95"
         >
           Back to Home
         </Link>
-      </motion.div>
-    </PageWrapper>
+      </div>
+    </div>
   );
 }

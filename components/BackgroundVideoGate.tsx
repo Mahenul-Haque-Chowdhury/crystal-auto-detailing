@@ -17,19 +17,22 @@ const markGateDone = () => {
 };
 
 export default function BackgroundVideoGate() {
-  const [show, setShow] = useState(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      return window.sessionStorage.getItem(WARM_KEY) !== "1";
-    } catch {
-      return true;
-    }
-  });
+  const [show, setShow] = useState(false);
 
+  // Determine on the client whether the gate should be shown.
+  // Runs once after hydration so server & client initial HTML always match (show=false).
   useEffect(() => {
-    // If the gate is skipped (warm session), still unblock animations.
-    if (!show) markGateDone();
-  }, [show]);
+    try {
+      if (window.sessionStorage.getItem(WARM_KEY) === "1") {
+        // Already warm — skip gate entirely
+        markGateDone();
+        return;
+      }
+    } catch {
+      // sessionStorage blocked — show the gate
+    }
+    setShow(true);
+  }, []);
 
   useEffect(() => {
     if (!show) return;

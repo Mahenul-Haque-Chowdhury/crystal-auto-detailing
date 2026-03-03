@@ -26,6 +26,7 @@ import {
   Briefcase,
   Droplets,
 } from 'lucide-react';
+import DateTimePicker from '@/components/DateTimePicker';
 
 function WhatsAppLogo({ className }: { className?: string }) {
   return (
@@ -702,21 +703,13 @@ export default function ServicesPage() {
                     <label className="text-xs font-medium text-slate-200" htmlFor="dateTime">
                       Date &amp; Time
                     </label>
-                    <div className="relative">
-                      <CalendarClock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-300/80" aria-hidden="true" />
-                      <input
-                        id="dateTime"
-                        type="datetime-local"
-                        min={minDateTime || undefined}
-                        value={form.dateTimeLocal}
-                        onChange={(e) => setForm((p) => ({ ...p, dateTimeLocal: e.target.value }))}
-                        className={classNames(
-                          'h-10 w-full rounded-lg border bg-transparent pl-9 pr-3 text-sm outline-none',
-                          'border-gold-400/20 text-slate-100 focus:border-gold-400/45',
-                        )}
-                        required
-                      />
-                    </div>
+                    <DateTimePicker
+                      id="dateTime"
+                      min={minDateTime || undefined}
+                      value={form.dateTimeLocal}
+                      onChange={(v) => setForm((p) => ({ ...p, dateTimeLocal: v }))}
+                      required
+                    />
                   </div>
 
                   <div className="space-y-1">
@@ -873,7 +866,8 @@ export default function ServicesPage() {
                         sizes="(min-width: 1024px) 50vw, 100vw"
                         className="translate-y-2 scale-[1.45] object-contain object-center drop-shadow-[0_24px_70px_rgba(0,0,0,0.55)] sm:-translate-y-20 sm:scale-[1.24] sm:object-bottom-left lg:-translate-y-28 lg:scale-[1.34]"
                         draggable={false}
-                        priority
+                        priority={isActive}
+                        loading={isActive ? 'eager' : 'lazy'}
                       />
                     </motion.div>
                   );
