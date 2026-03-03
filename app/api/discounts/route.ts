@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   const { data: existing, error: existingError } = await supabaseAdmin
     .from(discountsTableName)
     .select("id")
-    .or(`name.ilike.${name},phone.eq.${phone}`)
+    .or(`name.ilike."${name}",phone.eq."${phone}"`)
     .limit(1);
 
   if (existingError) {
