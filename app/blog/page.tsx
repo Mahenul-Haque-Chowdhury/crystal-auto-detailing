@@ -3,9 +3,9 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Blog',
-  description: 'Crystal Valley Auto Detail blog — car care tips, detailing guides and industry insights from Dhaka.',
+  description: 'Crystal Valley Auto Detail blog - car care tips, detailing guides and industry insights from Dhaka.',
   openGraph: {
-    title: 'Blog — Crystal Valley Auto Detail',
+    title: 'Blog - Crystal Valley Auto Detail',
     description: 'Car care tips, detailing guides and industry insights.',
     url: 'https://crystalvalley.autos/blog',
   },

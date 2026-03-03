@@ -3,9 +3,9 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Cookie Policy',
-  description: 'Crystal Valley Auto Detail cookie policy — how we use cookies and similar technologies on our website.',
+  description: 'Crystal Valley Auto Detail cookie policy - how we use cookies and similar technologies on our website.',
   openGraph: {
-    title: 'Cookie Policy — Crystal Valley Auto Detail',
+    title: 'Cookie Policy - Crystal Valley Auto Detail',
     description: 'How we use cookies on our website.',
     url: 'https://crystalvalley.autos/cookie-policy',
   },

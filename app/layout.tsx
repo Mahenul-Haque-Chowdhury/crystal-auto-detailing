@@ -19,11 +19,11 @@ const crystalGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL("https://crystalvalley.autos"),
   title: {
-    default: "Crystal Valley Auto Detail — Premium Car Detailing in Dhaka",
+    default: "Crystal Valley Auto Detail - Premium Car Detailing in Dhaka",
     template: "%s | Crystal Valley Auto Detail",
   },
   description:
-    "Dhaka's premium mobile car detailing service. Ceramic coating, interior deep cleaning, single-stage polish & more — delivered to your doorstep. Book online now.",
+    "Dhaka's premium mobile car detailing service. Ceramic coating, interior deep cleaning, single-stage polish & more - delivered to your doorstep. Book online now.",
   keywords: [
     "car detailing Dhaka",
     "ceramic coating Bangladesh",
@@ -39,9 +39,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://crystalvalley.autos",
     siteName: "Crystal Valley Auto Detail",
-    title: "Crystal Valley Auto Detail — Premium Car Detailing in Dhaka",
+    title: "Crystal Valley Auto Detail - Premium Car Detailing in Dhaka",
     description:
-      "Ceramic coating, interior deep cleaning, single-stage polish & more — delivered to your doorstep in Dhaka.",
+      "Ceramic coating, interior deep cleaning, single-stage polish & more - delivered to your doorstep in Dhaka.",
     images: [
       {
         url: "/og-image.png",
@@ -53,9 +53,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Crystal Valley Auto Detail — Premium Car Detailing in Dhaka",
+    title: "Crystal Valley Auto Detail - Premium Car Detailing in Dhaka",
     description:
-      "Ceramic coating, interior deep cleaning, single-stage polish & more — delivered to your doorstep in Dhaka.",
+      "Ceramic coating, interior deep cleaning, single-stage polish & more - delivered to your doorstep in Dhaka.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -107,7 +107,7 @@ gtag('config', 'G-GETR2PV4P1');`}
               "@id": "https://crystalvalley.autos/#business",
               name: "Crystal Valley Auto Detail",
               description:
-                "Dhaka's premium mobile car detailing service — ceramic coating, interior deep cleaning, single-stage polish and more.",
+                "Dhaka's premium mobile car detailing service - ceramic coating, interior deep cleaning, single-stage polish and more.",
               url: "https://crystalvalley.autos",
               email: "riffattonmoy@crystalvalley.autos",
               telephone: "+8801841353850",

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'Help Center',
   description: 'Get help with Crystal Valley Auto Detail bookings, services and account inquiries.',
   openGraph: {
-    title: 'Help Center — Crystal Valley Auto Detail',
+    title: 'Help Center - Crystal Valley Auto Detail',
     description: 'Get help with bookings, services and inquiries.',
     url: 'https://crystalvalley.autos/help',
   },

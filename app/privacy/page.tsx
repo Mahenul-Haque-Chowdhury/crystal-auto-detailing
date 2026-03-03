@@ -3,9 +3,9 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'Crystal Valley Auto Detail privacy policy — how we collect, use and protect your personal information.',
+  description: 'Crystal Valley Auto Detail privacy policy - how we collect, use and protect your personal information.',
   openGraph: {
-    title: 'Privacy Policy — Crystal Valley Auto Detail',
+    title: 'Privacy Policy - Crystal Valley Auto Detail',
     description: 'How we collect, use and protect your personal information.',
     url: 'https://crystalvalley.autos/privacy',
   },

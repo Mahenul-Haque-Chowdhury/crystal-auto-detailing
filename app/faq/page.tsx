@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'FAQs',
   description: 'Frequently asked questions about Crystal Valley Auto Detail’s car detailing services, pricing, and booking in Dhaka.',
   openGraph: {
-    title: 'FAQs — Crystal Valley Auto Detail',
+    title: 'FAQs - Crystal Valley Auto Detail',
     description: 'Answers to common questions about our car detailing services.',
     url: 'https://crystalvalley.autos/faq',
   },

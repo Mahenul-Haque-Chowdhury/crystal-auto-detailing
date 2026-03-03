@@ -224,7 +224,7 @@ export default function ServicesPage() {
   const estimatedPrice = useMemo(() => getEstimatedPrice(form.service, form.carType), [form.service, form.carType]);
 
   const investmentLabel = useMemo(() => {
-    if (!estimatedPrice) return '—';
+    if (!estimatedPrice) return '-';
     if (estimatedPrice.kind === 'exact') return formatBDT(estimatedPrice.amount);
     return `From ${formatBDT(estimatedPrice.amount)}`;
   }, [estimatedPrice]);
@@ -1150,7 +1150,7 @@ export default function ServicesPage() {
               {
                 icon: <Car className="h-6 w-6 text-gold-400" />,
                 title: "Convenience",
-                desc: "No driving to car washes—we come to your home or office."
+                desc: "No driving to car washes - we come to your home or office."
               },
               {
                 icon: <Briefcase className="h-6 w-6 text-gold-400" />,

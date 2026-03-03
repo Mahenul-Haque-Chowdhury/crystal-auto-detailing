@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'Refund Policy',
   description: 'Crystal Valley Auto Detail refund and cancellation policy for car detailing services.',
   openGraph: {
-    title: 'Refund Policy — Crystal Valley Auto Detail',
+    title: 'Refund Policy - Crystal Valley Auto Detail',
     description: 'Our refund and cancellation policy for car detailing services.',
     url: 'https://crystalvalley.autos/refund-policy',
   },

@@ -49,10 +49,10 @@ Booking submissions are handled server-side via `POST /api/booking`:
 
 ### Available Scripts
 
-- `npm run dev` – start the local dev server at localhost:3000
-- `npm run lint` – run ESLint against the project
-- `npm run build` – create an optimized production build
-- `npm start` – serve the production build
+- `npm run dev` - start the local dev server at localhost:3000
+- `npm run lint` - run ESLint against the project
+- `npm run build` - create an optimized production build
+- `npm start` - serve the production build
 
 ### Experience Notes
 

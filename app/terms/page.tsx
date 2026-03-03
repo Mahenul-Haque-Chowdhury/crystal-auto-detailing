@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'Terms of Use',
   description: 'Terms and conditions for using Crystal Valley Auto Detail services and website.',
   openGraph: {
-    title: 'Terms of Use — Crystal Valley Auto Detail',
+    title: 'Terms of Use - Crystal Valley Auto Detail',
     description: 'Terms and conditions for our car detailing services.',
     url: 'https://crystalvalley.autos/terms',
   },

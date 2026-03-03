@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type VideoTier = "off" | "p540" | "p720" | "p1080";
 
@@ -14,6 +14,13 @@ const VIDEO_WARM_KEY = "cvad:bgVideoWarm:v1";
 const VIDEO_READY_EVENT = "cvad:bgVideoReady";
 const VIDEO_DISABLED_EVENT = "cvad:bgVideoDisabled";
 const VIDEO_ERROR_EVENT = "cvad:bgVideoError";
+
+/** Interval (ms) for the watchdog that ensures the video never stays paused. */
+const WATCHDOG_INTERVAL_MS = 1_500;
+/** Maximum consecutive play-retries before giving up for a cycle. */
+const MAX_PLAY_RETRIES = 5;
+/** Delay between retry attempts (ms). */
+const PLAY_RETRY_DELAY_MS = 350;
 
 const readStoredPlayheadSeconds = (): number | null => {
   if (typeof window === "undefined") return null;
@@ -114,6 +121,37 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
     }
   }, [tier]);
 
+  /**
+   * Robust play helper – retries with exponential-ish back-off so transient
+   * browser blocks (iOS low-power, tab-switch debounce, etc.) are overcome.
+   */
+  const retryCountRef = useRef<number>(0);
+
+  const ensurePlaying = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || document.hidden) return;
+    if (!video.paused) {
+      retryCountRef.current = 0;
+      return;
+    }
+
+    if (retryCountRef.current >= MAX_PLAY_RETRIES) return;
+    retryCountRef.current += 1;
+
+    const attempt = () => {
+      if (!videoRef.current || document.hidden) return;
+      videoRef.current.play().catch(() => {
+        // Schedule another retry after a short delay
+        if (retryCountRef.current < MAX_PLAY_RETRIES) {
+          window.setTimeout(() => ensurePlaying(), PLAY_RETRY_DELAY_MS);
+        }
+      });
+    };
+
+    attempt();
+  }, []);
+
+  // ---- Visibility change: pause when hidden, aggressively resume when visible ----
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -124,15 +162,32 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
         return;
       }
 
-      // Best-effort resume; autoplay can still be blocked by some browsers.
-      void video.play().catch(() => undefined);
+      // Reset retry counter on every visibility restore so we get fresh attempts.
+      retryCountRef.current = 0;
+      ensurePlaying();
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [shouldLoad, tier]);
+  }, [shouldLoad, tier, ensurePlaying]);
+
+  // ---- Watchdog: periodically verify the video is still playing ----
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !shouldLoad || tier === "off") return;
+
+    const watchdogId = window.setInterval(() => {
+      if (document.hidden) return; // Don't fight the browser when tab is hidden
+      if (video.paused && video.readyState >= 2) {
+        retryCountRef.current = 0; // fresh cycle
+        ensurePlaying();
+      }
+    }, WATCHDOG_INTERVAL_MS);
+
+    return () => window.clearInterval(watchdogId);
+  }, [shouldLoad, tier, ensurePlaying]);
 
   // Determine if user is on Android (mobile) vs PC/iOS
   const isAndroid = useMemo(() => {
@@ -258,8 +313,8 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
         }
       }
 
-      // Best-effort start; muted videos generally allow autoplay.
-      void video.play().catch(() => undefined);
+      retryCountRef.current = 0;
+      ensurePlaying();
     };
 
     const markVisible = () => {
@@ -278,13 +333,68 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
       window.dispatchEvent(new CustomEvent(VIDEO_ERROR_EVENT));
     };
 
+    /**
+     * Auto-resume on unexpected pause — if the page is visible and the video
+     * pauses for any reason (iOS power management, browser throttle, etc.),
+     * try to restart it immediately.
+     */
+    const handleUnexpectedPause = () => {
+      if (document.hidden) return; // Intentional pause
+      retryCountRef.current = 0;
+      // Small delay to avoid fighting the browser during intentional pauses
+      window.setTimeout(() => ensurePlaying(), 100);
+    };
+
+    /**
+     * Handle stalled / waiting — the video is trying to play but ran out of
+     * data. Once enough data arrives (`canplaythrough`) it should auto-resume,
+     * but we add a safety net.
+     */
+    const handleStalled = () => {
+      if (document.hidden) return;
+      // Give the browser a moment to buffer, then nudge
+      window.setTimeout(() => {
+        if (videoRef.current?.paused && !document.hidden) {
+          retryCountRef.current = 0;
+          ensurePlaying();
+        }
+      }, 800);
+    };
+
+    /**
+     * Safety net for `ended` — should never fire with `loop`, but some
+     * browsers/edge-cases may not honour the loop attribute.
+     */
+    const handleEnded = () => {
+      try {
+        video.currentTime = 0;
+      } catch {
+        // ignore
+      }
+      retryCountRef.current = 0;
+      ensurePlaying();
+    };
+
     video.addEventListener("timeupdate", persistPlayhead);
     video.addEventListener("pause", persistPlayhead);
+    video.addEventListener("pause", handleUnexpectedPause);
     video.addEventListener("loadedmetadata", restoreAndPlay);
     video.addEventListener("canplay", markVisible, { once: true });
     video.addEventListener("playing", markVisible, { once: true });
     video.addEventListener("error", handleError);
+    video.addEventListener("stalled", handleStalled);
+    video.addEventListener("waiting", handleStalled);
+    video.addEventListener("ended", handleEnded);
     window.addEventListener("pagehide", persistPlayhead);
+
+    // Also try to resume on focus (iOS Safari sometimes needs this)
+    const handleFocus = () => {
+      if (video.paused && !document.hidden) {
+        retryCountRef.current = 0;
+        ensurePlaying();
+      }
+    };
+    window.addEventListener("focus", handleFocus);
 
     if (video.readyState >= 1) {
       restoreAndPlay();
@@ -293,13 +403,18 @@ export default function AdaptiveBackgroundVideo({ className = "" }: AdaptiveBack
     return () => {
       video.removeEventListener("timeupdate", persistPlayhead);
       video.removeEventListener("pause", persistPlayhead);
+      video.removeEventListener("pause", handleUnexpectedPause);
       video.removeEventListener("loadedmetadata", restoreAndPlay);
       video.removeEventListener("canplay", markVisible);
       video.removeEventListener("playing", markVisible);
       video.removeEventListener("error", handleError);
+      video.removeEventListener("stalled", handleStalled);
+      video.removeEventListener("waiting", handleStalled);
+      video.removeEventListener("ended", handleEnded);
       window.removeEventListener("pagehide", persistPlayhead);
+      window.removeEventListener("focus", handleFocus);
     };
-  }, [shouldLoad, src]);
+  }, [shouldLoad, src, ensurePlaying]);
 
   if (tier === "off") {
     return null;

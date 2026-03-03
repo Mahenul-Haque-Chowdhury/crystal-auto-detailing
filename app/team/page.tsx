@@ -3,9 +3,9 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Our Team',
-  description: 'Meet the Crystal Valley Auto Detail team — passionate car care professionals in Dhaka.',
+  description: 'Meet the Crystal Valley Auto Detail team - passionate car care professionals in Dhaka.',
   openGraph: {
-    title: 'Our Team — Crystal Valley Auto Detail',
+    title: 'Our Team - Crystal Valley Auto Detail',
     description: 'Meet the team behind Dhaka\'s premium car detailing service.',
     url: 'https://crystalvalley.autos/team',
   },
