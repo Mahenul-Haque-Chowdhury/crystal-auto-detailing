@@ -90,3 +90,60 @@ create index if not exists discounts_name_idx
 alter table public.discounts enable row level security;
 
 -- No public policies created intentionally.
+
+-- ====================
+-- 3) Blog posts table
+-- ====================
+
+create table if not exists public.blog_posts (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  published_at timestamptz,
+
+  title text not null,
+  slug text not null unique,
+  excerpt text,
+  content text not null default '',
+  cover_image text,
+  author text not null default 'Crystal Valley Auto Detail',
+
+  -- 'draft' | 'published'
+  status text not null default 'draft',
+
+  -- SEO fields
+  meta_title text,
+  meta_description text
+);
+
+create unique index if not exists blog_posts_slug_idx
+  on public.blog_posts (slug);
+
+create index if not exists blog_posts_published_at_idx
+  on public.blog_posts (published_at desc);
+
+create index if not exists blog_posts_status_idx
+  on public.blog_posts (status);
+
+-- Auto-update updated_at on row changes
+create or replace function public.update_blog_posts_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists blog_posts_updated_at_trigger on public.blog_posts;
+create trigger blog_posts_updated_at_trigger
+  before update on public.blog_posts
+  for each row
+  execute function public.update_blog_posts_updated_at();
+
+-- RLS: API uses SUPABASE_SERVICE_ROLE_KEY server-side.
+alter table public.blog_posts enable row level security;
+
+-- Allow anonymous reads for published posts only
+create policy "Public can read published blog posts"
+  on public.blog_posts for select
+  using (status = 'published');

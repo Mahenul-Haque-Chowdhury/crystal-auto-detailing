@@ -1,5 +1,6 @@
 @import "../node_modules/tailwindcss/index.css";
 @import "../components/GlassSurface.css";
+@plugin "@tailwindcss/typography";
 
 :root {
   --background: #05060b;
@@ -889,6 +890,66 @@ input[type="reset"]:disabled,
    SCROLL-TRIGGERED ANIMATION HELPERS
    ============================================ */
 
+/* ============================================
+   TIPTAP RICH TEXT EDITOR STYLES
+   ============================================ */
+.tiptap {
+  outline: none;
+}
+.tiptap p.is-editor-empty:first-child::before {
+  color: #64748b;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+.tiptap table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+.tiptap table td,
+.tiptap table th {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.5rem 0.75rem;
+  min-width: 100px;
+}
+.tiptap table th {
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 600;
+}
+.tiptap pre {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-family: monospace;
+  overflow-x: auto;
+}
+.tiptap pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.875rem;
+}
+.tiptap blockquote {
+  border-left: 3px solid var(--color-gold-400, #d4a843);
+  margin: 1rem 0;
+  padding-left: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+.tiptap img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+}
+.tiptap hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  margin: 1.5rem 0;
+}
+.tiptap a {
+  color: var(--color-gold-400, #d4a843);
+  text-decoration: underline;
+}
+
 .scroll-reveal {
   opacity: 0;
   transform: translateY(40px);
@@ -935,4 +996,109 @@ input[type="reset"]:disabled,
 .scroll-reveal-scale.visible {
   opacity: 1;
   transform: scale(1);
+}
+
+/* ============================================
+   TIPTAP RICH TEXT EDITOR STYLES
+   ============================================ */
+
+.tiptap {
+  outline: none;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: rgba(148, 163, 184, 0.5);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.tiptap h1 { font-size: 2em; font-weight: 700; margin: 0.67em 0; }
+.tiptap h2 { font-size: 1.5em; font-weight: 700; margin: 0.83em 0; }
+.tiptap h3 { font-size: 1.17em; font-weight: 700; margin: 1em 0; }
+.tiptap h4 { font-size: 1em; font-weight: 700; margin: 1.33em 0; }
+
+.tiptap ul { list-style-type: disc; padding-left: 1.5em; margin: 0.5em 0; }
+.tiptap ol { list-style-type: decimal; padding-left: 1.5em; margin: 0.5em 0; }
+.tiptap li { margin: 0.25em 0; }
+
+.tiptap blockquote {
+  border-left: 3px solid rgba(212, 175, 55, 0.5);
+  padding-left: 1em;
+  margin: 1em 0;
+  color: rgba(148, 163, 184, 0.8);
+  font-style: italic;
+}
+
+.tiptap hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 1.5em 0;
+}
+
+.tiptap a {
+  color: #d4af37;
+  text-decoration: underline;
+}
+
+.tiptap pre {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.tiptap pre code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.875em;
+  color: #e2e8f0;
+}
+
+.tiptap code {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 0.25rem;
+  padding: 0.15em 0.3em;
+  font-size: 0.875em;
+}
+
+.tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 1em auto;
+  display: block;
+}
+
+.tiptap table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.tiptap table td,
+.tiptap table th {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.5em 0.75em;
+  min-width: 80px;
+  vertical-align: top;
+}
+
+.tiptap table th {
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 600;
+}
+
+.tiptap table .selectedCell {
+  background: rgba(212, 175, 55, 0.15);
+}
+
+.tiptap p {
+  margin: 0.5em 0;
+}
+
+.tiptap mark {
+  border-radius: 0.15em;
+  padding: 0.05em 0.15em;
 }

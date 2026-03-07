@@ -8,6 +8,12 @@ import SiteHeader from "@/components/SiteHeader";
 export default function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const hideFooter = pathname === "/discounts" || pathname.startsWith("/discounts/");
+  const isAdmin = pathname.startsWith("/admin");
+
+  // Admin routes render their own shell — skip site header/footer
+  if (isAdmin) {
+    return <>{children}</>;
+  }
 
   return (
     <>
